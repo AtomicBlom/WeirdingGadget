@@ -1,0 +1,51 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "transform": "forge:default-block",
+    "custom": {
+      "flip-v": true
+    },
+    "model": "hcmw:ss_chunk_loader.obj",
+    "textures": {
+      "#weirdinggadget:SSChunkL": "weirdinggadget:models/SSChunkL"
+    }
+  },
+  "variants": {
+    "normal": [{
+    }],
+    "inventory": [{
+      "transform": {
+        "gui": {
+          "rotation": [{"x": 30}, {"y": 225}],
+          "scale": 0.625
+        },
+        "ground": {
+          "scale": 0.25
+        },
+        "fixed": {
+          "scale": 0.5
+        },
+        "thirdperson_lefthand": {
+          "rotation": [{"x": 75}, {"y": 30}],
+          "translation": [ -0.05, 0.15, 0.1],
+          "scale": 0.375
+        },
+        "thirdperson_righthand": {
+          "rotation": [{"x": 75}, {"y": 30}],
+          "translation": [ -0.05, 0.15, 0.1],
+          "scale": 0.375
+        },
+        "firstperson": {
+          "rotation": {"y": 45 },
+          "translation": [ 0, 0.2, 0],
+          "scale": 0.4
+        },
+        "firstperson_lefthand": {
+          "rotation": {"y": 45 },
+          "translation": [ 0, 0.2, 0],
+          "scale": 0.4
+        }
+      }
+    }],
+  }
+}
