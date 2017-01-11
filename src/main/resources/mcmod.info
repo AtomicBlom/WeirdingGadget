@@ -1,14 +1,14 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
+  "modid": "weirdinggadget",
+  "name": "The Weirding Gadget",
+  "description": "No idea what this does, but stuff happens when I'm not here.",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["AtomicBlom", "Rorax"],
+  "credits": "",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []

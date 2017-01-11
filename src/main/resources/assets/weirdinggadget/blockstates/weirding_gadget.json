@@ -5,9 +5,9 @@
     "custom": {
       "flip-v": true
     },
-    "model": "hcmw:ss_chunk_loader.obj",
+    "model": "weirdinggadget:ss_chunk_loader.obj",
     "textures": {
-      "#weirdinggadget:SSChunkL": "weirdinggadget:models/SSChunkL"
+      "#weirdinggadget:models/sschunkl": "weirdinggadget:models/sschunkl"
     }
   },
   "variants": {
@@ -46,6 +46,6 @@
           "scale": 0.4
         }
       }
-    }],
+    }]
   }
 }

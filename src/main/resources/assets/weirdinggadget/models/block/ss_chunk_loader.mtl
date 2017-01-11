@@ -12,5 +12,5 @@ newmtl Material__0
 #	Kd 0.5880 0.5880 0.5880
 #	Ks 0.0000 0.0000 0.0000
 #	Ke 0.0000 0.0000 0.0000
-map_Ka weirdinggadget:SSChunkL
+map_Ka weirdinggadget:models/sschunkl
 #	map_Kd F:\3dsMax\scenes\Minecraft\SteamSteel\SSChunkL.png
