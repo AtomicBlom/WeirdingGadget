@@ -11,11 +11,10 @@ public class WeirdingGadgetMod
 {
     public static final String MODID = "weirdinggadget";
     public static final String VERSION = "1.0";
+    public static final int MULTIPLIER = 60 * 60 * 20; //Hours in ticks
 
     @Mod.Instance
     public static WeirdingGadgetMod INSTANCE;
-
-    public static final PlayerTicketManager ticketManager = new PlayerTicketManager();
 
     @EventHandler void init(FMLInitializationEvent event) {
 
@@ -23,6 +22,6 @@ public class WeirdingGadgetMod
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        ForgeChunkManager.setForcedChunkLoadingCallback(INSTANCE, new WGLoadingCallback());
+        ForgeChunkManager.setForcedChunkLoadingCallback(INSTANCE, new ChunkManagerCallback());
     }
 }

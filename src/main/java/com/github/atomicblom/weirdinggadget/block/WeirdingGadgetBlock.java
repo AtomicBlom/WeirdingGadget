@@ -1,5 +1,7 @@
 package com.github.atomicblom.weirdinggadget.block;
 
+import com.github.atomicblom.weirdinggadget.TicketUtils;
+import com.github.atomicblom.weirdinggadget.Settings;
 import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
 import com.github.atomicblom.weirdinggadget.block.TileEntity.WeirdingGadgetTileEntity;
 import net.minecraft.block.Block;
@@ -16,7 +18,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -48,24 +49,13 @@ public class WeirdingGadgetBlock extends Block
             //Player has requested too many tickets. Forge will log an issue here.
             return;
         }
-        final ChunkPos chunk = new ChunkPos(pos);
+
 
         final NBTTagCompound modData = ticket.getModData();
         modData.setTag("blockPosition", NBTUtil.createPosTag(pos));
-        modData.setInteger("size", 3);
+        modData.setInteger("size", Settings.chunkLoaderWidth);
 
-        for (int z = chunk.chunkZPos - 1; z <= chunk.chunkZPos + 1; ++z) {
-            for (int x = chunk.chunkXPos - 1; x <= chunk.chunkXPos + 1; ++x) {
-                final ChunkPos ticketChunk = new ChunkPos(x, z);
-
-                ForgeChunkManager.forceChunk(ticket, ticketChunk);
-            }
-        }
-
-        final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)worldIn.getTileEntity(pos);
-
-        tileEntity.setTicket(ticket);
-        tileEntity.setPlacer(placer);
+        TicketUtils.activateTicket(worldIn, ticket);
     }
 
     @Override

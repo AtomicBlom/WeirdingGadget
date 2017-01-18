@@ -1,6 +1,9 @@
 package com.github.atomicblom.weirdinggadget.block.TileEntity;
 
 import com.github.atomicblom.weirdinggadget.Logger;
+import com.github.atomicblom.weirdinggadget.Settings;
+import com.github.atomicblom.weirdinggadget.TicketUtils;
+import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -42,7 +45,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         return ticket;
     }
 
-    public void setPlacer(@Nonnull EntityPlayer placer)
+    public void setPlacer(@Nullable EntityPlayer placer)
     {
         this.placer = new WeakReference<EntityPlayer>(placer);
     }
@@ -63,28 +66,17 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
             return;
         }
 
-
         EntityPlayer placer = getPlacer();
         if (placer != null) {
-            boolean located = false;
-            for (final EntityPlayerMP entityPlayerMP : world.getMinecraftServer().getPlayerList().getPlayers())
-            {
-                if (entityPlayerMP.getName() == placer.getName()) {
-                    located = true;
-                    break;
-                }
-            }
+            placer = TicketUtils.getOnlinePlayerByName(world.getMinecraftServer(), placer.getName());
 
-            if (!located) {
+            if (placer == null) {
                 this.placer.clear();
-                placer = null;
             }
         }
 
         if (placer == null && ticket != null) {
-            //FIXME: Lookup list of online players, rather than dimension players
-
-            final EntityPlayer playerEntityByName = world.getPlayerEntityByName(ticket.getPlayerName());
+            final EntityPlayer playerEntityByName = TicketUtils.getOnlinePlayerByName(world.getMinecraftServer(), ticket.getPlayerName());
             if (playerEntityByName != null) {
                 expireTime = -1;
                 this.placer = new WeakReference<EntityPlayer>(playerEntityByName);
@@ -94,7 +86,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
 
             if (expireTime == -1)
             {
-                int timeout = 1 * 20 * 20;
+                int timeout = Settings.hoursBeforeDeactivation * WeirdingGadgetMod.MULTIPLIER;
                 expireTime = totalWorldTime + timeout;
                 Logger.info("Player %s has gone offline. Ticket is scheduled to expire at world time %d", ticket.getPlayerName(), expireTime);
             }
