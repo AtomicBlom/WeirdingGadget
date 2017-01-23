@@ -2,12 +2,9 @@
   "forge_marker": 1,
   "defaults": {
     "transform": "forge:default-block",
-    "custom": {
-      "flip-v": true
-    },
-    "model": "weirdinggadget:ss_chunk_loader.obj",
+    "model": "weirdinggadget:ss_chunk_loader.ogex",
     "textures": {
-      "#weirdinggadget:models/sschunkl": "weirdinggadget:models/sschunkl"
+      "#sschunkl": "weirdinggadget:models/sschunkl"
     }
   },
   "variants": {
@@ -46,6 +43,22 @@
           "scale": 0.4
         }
       }
-    }]
+    }],
+    "render_dynamic": {
+      "false": {
+        "custom": {
+          "enabled-nodes": [
+            "clbody"
+          ]
+        }
+      },
+      "true": {
+        "custom": {
+          "enabled-nodes": [
+            "clspinner"
+          ]
+        }
+      }
+    }
   }
 }

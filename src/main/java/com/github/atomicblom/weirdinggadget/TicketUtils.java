@@ -6,6 +6,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -65,7 +66,12 @@ public class TicketUtils {
 
     public static EntityPlayerMP getOnlinePlayerByName(MinecraftServer server, String playerName) {
         EntityPlayerMP locatedPlayer = null;
-        for (final EntityPlayerMP entityPlayerMP : server.getPlayerList().getPlayers())
+        if (server == null || server.getPlayerList() == null) {
+            return null;
+        }
+        final PlayerList playerList = server.getPlayerList();
+
+        for (final EntityPlayerMP entityPlayerMP : playerList.getPlayers())
         {
             if (entityPlayerMP.getName() == playerName) {
                 locatedPlayer = entityPlayerMP;

@@ -4,9 +4,13 @@ import com.github.atomicblom.weirdinggadget.TicketUtils;
 import com.github.atomicblom.weirdinggadget.Settings;
 import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
 import com.github.atomicblom.weirdinggadget.block.TileEntity.WeirdingGadgetTileEntity;
+import com.github.atomicblom.weirdinggadget.client.opengex.OpenGEXAnimationFrameProperty;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -22,13 +26,40 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
+import net.minecraftforge.common.property.ExtendedBlockState;
+import net.minecraftforge.common.property.IUnlistedProperty;
 import javax.annotation.Nullable;
 
 public class WeirdingGadgetBlock extends Block
 {
+    public static final PropertyBool RENDER_DYNAMIC = PropertyBool.create("render_dynamic");
+
     public WeirdingGadgetBlock()
     {
         super(Material.ROCK, MapColor.YELLOW);
+        setDefaultState(
+                blockState
+                        .getBaseState()
+                        .withProperty(RENDER_DYNAMIC, false)
+        );
+    }
+
+    @Override
+    protected BlockStateContainer createBlockState()
+    {
+        return new ExtendedBlockState(this, new IProperty[]{RENDER_DYNAMIC}, new IUnlistedProperty[]{OpenGEXAnimationFrameProperty.instance});
+    }
+
+    @Override
+    public IBlockState getStateFromMeta(int meta)
+    {
+        return getDefaultState();
+    }
+
+    @Override
+    public int getMetaFromState(IBlockState state)
+    {
+        return 0;
     }
 
     @Override
