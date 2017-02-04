@@ -88,8 +88,8 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
 
             if (expireTime == -1)
             {
-                //int timeout = Settings.hoursBeforeDeactivation * WeirdingGadgetMod.MULTIPLIER;
-                int timeout = 10 * 20;
+                int timeout = Settings.hoursBeforeDeactivation * WeirdingGadgetMod.MULTIPLIER;
+                //int timeout = 10 * 20;
                 expireTime = totalWorldTime + timeout;
                 Logger.info("Player %s has gone offline. Ticket is scheduled to expire at world time %d", ticket.getPlayerName(), expireTime);
             }
