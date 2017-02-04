@@ -108,9 +108,6 @@ public class OpenGEXModelInstance implements IPerspectiveAwareModel
 
                     final List<OgexVertexArray> vertexArrays = mesh.getVertexArrays();
 
-                    Vector4f vertex = new Vector4f();
-                    Vector3f normal = new Vector3f();
-
                     final Matrix4f nodeTransformation = new Matrix4f(nodeMatrices[geometryNode.getIndex()]);
 
                     for (OgexIndexArray indexArray : mesh.getIndexArrays())
@@ -118,6 +115,15 @@ public class OpenGEXModelInstance implements IPerspectiveAwareModel
                         for (long[] polyGroup : (long[][]) indexArray.getArray())
                         {
                             UnpackedBakedQuad.Builder quadBuilder = new UnpackedBakedQuad.Builder(format);
+
+                            TextureAtlasSprite sprite;
+                            if (this.textures.isEmpty()){
+                                sprite = this.textures.get("missingno");
+                            }
+                            else if (textures.get(0) == OpenGEXModel.white) sprite = ModelLoader.White.INSTANCE;
+                            else sprite = this.textures.get(textures.get(0).getTexture());
+
+                            VertexData[] vertexData = new VertexData[polyGroup.length];
 
                             for (int i = 0; i < polyGroup.length; i++)
                             {
@@ -145,6 +151,9 @@ public class OpenGEXModelInstance implements IPerspectiveAwareModel
                                         texcoordArray = array.getArray2()[vertexIndex];
                                     }
                                 }
+
+                                Vector4f vertex = new Vector4f();
+                                Vector3f normal = new Vector3f();
 
                                 //FIXME: don't assume arrays are populated, update for appropriate format.
                                 vertex.x = positionArray[0];
@@ -174,24 +183,22 @@ public class OpenGEXModelInstance implements IPerspectiveAwareModel
                                 tm.transform(normal);
                                 normal.normalize();
 
-                                //FIXME: generate face normal
                                 quadBuilder.setQuadOrientation(EnumFacing.getFacingFromVector(normal.x, normal.y, normal.z));
 
-                                TextureAtlasSprite sprite;
-                                if (this.textures.isEmpty()){
-                                    sprite = this.textures.get("missingno");
-                                }
-                                else if (textures.get(0) == OpenGEXModel.white) sprite = ModelLoader.White.INSTANCE;
-                                else sprite = this.textures.get(textures.get(0).getTexture());
+                                vertexData[i] = new VertexData(vertex, normal, texcoordArray, colorArray);
+                            }
 
-                                //FIXME: calculate the face normal.
-                                Vector3f faceNormal = normal;
-                                putVertexData(quadBuilder, vertex, faceNormal, normal, texcoordArray, colorArray, sprite);
-                                if (i == 2 && type == MeshType.Triangles)
+                            Vector3f faceNormal = getNormal(vertexData[0].vertex, vertexData[1].vertex, vertexData[2].vertex);
+                            //faceNormal = new Vector3f(1, 0, 0);
+                            for (int j = 0; j < vertexData.length; j++)
+                            {
+                                putVertexData(quadBuilder, vertexData[j].vertex, faceNormal, faceNormal, vertexData[j].texcoordArray, vertexData[j].colorArray, sprite);
+                                if (j == 2 && type == MeshType.Triangles)
                                 {
-                                    putVertexData(quadBuilder, vertex, faceNormal, normal, texcoordArray, colorArray, sprite);
+                                    putVertexData(quadBuilder, vertexData[j].vertex, faceNormal, faceNormal, vertexData[j].texcoordArray, vertexData[j].colorArray, sprite);
                                 }
                             }
+
                             builder.add(quadBuilder.build());
                         }
                     }
@@ -201,6 +208,27 @@ public class OpenGEXModelInstance implements IPerspectiveAwareModel
             quads = builder.build();
         }
         return quads;
+    }
+
+    //p1, p2, p3 - Vertices of triangle
+    private Vector3f getNormal(Vector4f p1, Vector4f p2, Vector4f p3) {
+
+        //Create normal vector we are going to output.
+        Vector3f output = new Vector3f();
+
+        //Calculate vectors used for creating normal (these are the edges of the triangle).
+        Vector3f calU = new Vector3f(p2.x-p1.x, p2.y-p1.y, p2.z-p1.z);
+        Vector3f calV = new Vector3f(p3.x-p1.x, p3.y-p1.y, p3.z-p1.z);
+
+        //The output vector is equal to the cross products of the two edges of the triangle
+        output.x = calU.y*calV.z - calU.z*calV.y;
+        output.y = calU.z*calV.x - calU.x*calV.z;
+        output.z = calU.x*calV.y - calU.y*calV.x;
+
+        //Return the resulting vector.
+        output.normalize();
+
+        return output;
     }
 
     private void putVertexData(UnpackedBakedQuad.Builder builder, Vector4f vertex, Vector3f faceNormal, Vector3f vertexNormal, float[] textureCoordinates, float[] color, TextureAtlasSprite sprite)
