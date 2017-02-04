@@ -18,7 +18,7 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 public class WeirdingGadgetTESR extends TileEntitySpecialRenderer<WeirdingGadgetTileEntity>
 {
     private ReusableVertexBuffer vertexBuffer = null;
-    final WorldVertexBufferUploader vertexBufferUploader = new WorldVertexBufferUploader();
+    private final WorldVertexBufferUploader vertexBufferUploader = new WorldVertexBufferUploader();
 
     @Override
     public void renderTileEntityAt(WeirdingGadgetTileEntity te, double x, double y, double z, float partialTicks, int destroyStage)
@@ -33,17 +33,19 @@ public class WeirdingGadgetTESR extends TileEntitySpecialRenderer<WeirdingGadget
             vertexBuffer = new ReusableVertexBuffer(2097152);
             vertexBuffer.writeModel(model, blockState);
         }
+        float angle = 0;
 
-        final float offset = -0.5f;
-        final float angle = System.currentTimeMillis() % (360 * 4) / 4.0f;
-
+        if (te.isActive())
+        {
+            angle = System.currentTimeMillis() % (360 * 4) / 4.0f;
+        }
         bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         RenderHelper.disableStandardItemLighting();
         GlStateManager.pushMatrix();
         GlStateManager.translate(x, y, z);
-        GlStateManager.translate(-offset, 0, -offset);
+        GlStateManager.translate(0.5f, 0, 0.5f);
         GlStateManager.rotate(angle, 0, 1, 0);
-        GlStateManager.translate(offset, 0, offset);
+        GlStateManager.translate(-0.5f, 0, -0.5f);
         vertexBufferUploader.draw(vertexBuffer);
         GlStateManager.popMatrix();
         RenderHelper.enableStandardItemLighting();

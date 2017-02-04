@@ -156,7 +156,6 @@ public class WeirdingGadgetBlock extends Block
 
     ///////////// Networking /////////////////
 
-
     @Override
     public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param)
     {

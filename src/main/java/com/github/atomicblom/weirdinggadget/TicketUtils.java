@@ -45,9 +45,9 @@ public class TicketUtils {
         final ChunkPos chunk = new ChunkPos(pos);
 
         int minX = chunk.chunkXPos - (int)(size / 2.0f);
-        int maxX = chunk.chunkXPos - (int)((size - 1) / 2.0f);
+        int maxX = chunk.chunkXPos + (int)((size - 1) / 2.0f);
         int minZ = chunk.chunkZPos - (int)(size/ 2.0f);
-        int maxZ = chunk.chunkZPos - (int)((size - 1) / 2.0f);
+        int maxZ = chunk.chunkZPos + (int)((size - 1) / 2.0f);
 
         for (int z = minZ; z <= maxZ; ++z) {
             for (int x = minX; x <= maxX; ++x) {
@@ -66,14 +66,14 @@ public class TicketUtils {
 
     public static EntityPlayerMP getOnlinePlayerByName(MinecraftServer server, String playerName) {
         EntityPlayerMP locatedPlayer = null;
-        if (server == null || server.getPlayerList() == null) {
+        if (server == null || server.getPlayerList() == null || playerName == null) {
             return null;
         }
         final PlayerList playerList = server.getPlayerList();
 
         for (final EntityPlayerMP entityPlayerMP : playerList.getPlayers())
         {
-            if (entityPlayerMP.getName() == playerName) {
+            if (playerName.equals(entityPlayerMP.getName())) {
                 locatedPlayer = entityPlayerMP;
                 break;
             }

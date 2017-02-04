@@ -31,11 +31,13 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
 
     public void setTicket(@Nonnull Ticket ticket)
     {
-        this.ticket = ticket;
-        world.addBlockEvent(pos, blockType, ACTIVE_STATE_CHANGED, 1);
-        expireTime = -1;
-        isActive = true;
+        if (this.ticket != null) {
+            ForgeChunkManager.releaseTicket(this.ticket);
+        }
 
+        this.ticket = ticket;
+        world.addBlockEvent(pos, getBlockType(), ACTIVE_STATE_CHANGED, 1);
+        expireTime = -1;
         Logger.info("Waking up Chunk Loader at %s because %s placed/interacted with it", pos, ticket.getPlayerName());
     }
 
@@ -80,12 +82,14 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
                 expireTime = -1;
                 this.placer = new WeakReference<EntityPlayer>(playerEntityByName);
                 Logger.info("Chunk Loader at %s is revived because %s returned", pos, playerEntityByName.getName());
+                world.addBlockEvent(pos, getBlockType(), ACTIVE_STATE_CHANGED, 1);
                 return;
             }
 
             if (expireTime == -1)
             {
-                int timeout = Settings.hoursBeforeDeactivation * WeirdingGadgetMod.MULTIPLIER;
+                //int timeout = Settings.hoursBeforeDeactivation * WeirdingGadgetMod.MULTIPLIER;
+                int timeout = 10 * 20;
                 expireTime = totalWorldTime + timeout;
                 Logger.info("Player %s has gone offline. Ticket is scheduled to expire at world time %d", ticket.getPlayerName(), expireTime);
             }
@@ -95,7 +99,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
             Logger.info("Ticket for Weirding Gadget at %s has expired.", pos);
             ForgeChunkManager.releaseTicket(ticket);
             ticket = null;
-            world.addBlockEvent(pos, blockType, ACTIVE_STATE_CHANGED, 0);
+            world.addBlockEvent(pos, getBlockType(), ACTIVE_STATE_CHANGED, 0);
         }
     }
 
@@ -129,5 +133,10 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
     public boolean isExpired()
     {
         return ticket == null;
+    }
+
+    public boolean isActive()
+    {
+        return isActive;
     }
 }
