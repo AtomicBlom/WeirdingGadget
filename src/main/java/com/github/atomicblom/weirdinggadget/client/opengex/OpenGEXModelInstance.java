@@ -57,6 +57,10 @@ public class OpenGEXModelInstance implements IPerspectiveAwareModel
     @Override
     public List<BakedQuad> getQuads(IBlockState blockState, EnumFacing side, long rand)
     {
+        if (side != null) {
+            return new ArrayList<>();
+        }
+
         if (quads == null || (blockState != null && blockState.getValue(WeirdingGadgetBlock.RENDER_DYNAMIC)))
         {
             float animationTime = 0;
@@ -116,6 +120,7 @@ public class OpenGEXModelInstance implements IPerspectiveAwareModel
                         {
                             UnpackedBakedQuad.Builder quadBuilder = new UnpackedBakedQuad.Builder(format);
 
+
                             TextureAtlasSprite sprite;
                             if (this.textures.isEmpty()){
                                 sprite = this.textures.get("missingno");
@@ -152,8 +157,8 @@ public class OpenGEXModelInstance implements IPerspectiveAwareModel
                                     }
                                 }
 
-                                Vector4f vertex = new Vector4f();
-                                Vector3f normal = new Vector3f();
+                                final Vector4f vertex = new Vector4f();
+                                final Vector3f normal = new Vector3f();
 
                                 //FIXME: don't assume arrays are populated, update for appropriate format.
                                 vertex.x = positionArray[0];
@@ -198,6 +203,7 @@ public class OpenGEXModelInstance implements IPerspectiveAwareModel
                                     putVertexData(quadBuilder, vertexData[j].vertex, faceNormal, faceNormal, vertexData[j].texcoordArray, vertexData[j].colorArray, sprite);
                                 }
                             }
+                            quadBuilder.setTexture(sprite);
 
                             builder.add(quadBuilder.build());
                         }
