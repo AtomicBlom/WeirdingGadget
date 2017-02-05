@@ -9,6 +9,7 @@ import com.github.atomicblom.weirdinggadget.library.ItemLibrary;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
@@ -47,8 +48,9 @@ public class Registration
     private static void registerRecipes()
     {
         GameRegistry.addRecipe(new ItemStack(BlockLibrary.weirding_gadget),
-                new String[] {" g ", "geg", "gig"},
+                new String[] {"ggg", "GeG", "GiG"},
                 'g', Items.GOLD_INGOT,
+                'G', Blocks.GOLD_BLOCK,
                 'i', Items.IRON_INGOT,
                 'e', Items.ENDER_EYE
                 );
