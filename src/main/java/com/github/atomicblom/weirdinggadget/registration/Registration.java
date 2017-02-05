@@ -9,8 +9,11 @@ import com.github.atomicblom.weirdinggadget.library.ItemLibrary;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Items;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
@@ -37,6 +40,18 @@ public class Registration
     public static void registerItems(Register<Item> event) {
         final IForgeRegistry<Item> registry = event.getRegistry();
         registry.register(configureBlockItem(BlockLibrary.weirding_gadget));
+
+        registerRecipes();
+    }
+
+    private static void registerRecipes()
+    {
+        GameRegistry.addRecipe(new ItemStack(BlockLibrary.weirding_gadget),
+                new String[] {" g ", "geg", "gig"},
+                'g', Items.GOLD_INGOT,
+                'i', Items.IRON_INGOT,
+                'e', Items.ENDER_EYE
+                );
     }
 
     static <B extends Block> B configure(B block, ResourceLocation registryName) {
