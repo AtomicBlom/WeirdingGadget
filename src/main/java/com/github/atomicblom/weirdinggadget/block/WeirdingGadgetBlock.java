@@ -6,6 +6,7 @@ import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
 import com.github.atomicblom.weirdinggadget.block.TileEntity.WeirdingGadgetTileEntity;
 import com.github.atomicblom.weirdinggadget.client.opengex.OpenGEXAnimationFrameProperty;
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -42,6 +43,9 @@ public class WeirdingGadgetBlock extends Block
                         .getBaseState()
                         .withProperty(RENDER_DYNAMIC, false)
         );
+        setHardness(3.0f);
+        setResistance(5.0f);
+        setSoundType(SoundType.STONE);
     }
 
     @Override
@@ -119,7 +123,11 @@ public class WeirdingGadgetBlock extends Block
         return new WeirdingGadgetTileEntity();
     }
 
-
+    @Override
+    public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        return 5;
+    }
 
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
