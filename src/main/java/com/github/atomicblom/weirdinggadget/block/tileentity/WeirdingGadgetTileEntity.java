@@ -112,7 +112,6 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
     @Override
     public void readFromNBT(NBTTagCompound compound)
     {
-        Logger.info("readFromNBT()");
         super.readFromNBT(compound);
         expireTime = compound.hasKey("expireTime") ? compound.getLong("expireTime") : -1;
     }
@@ -120,7 +119,6 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
-        Logger.info("writeToNBT()");
         super.writeToNBT(compound);
         compound.setLong("expireTime", expireTime);
         return compound;
@@ -129,7 +127,6 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
     @Override
     public boolean receiveClientEvent(int id, int type)
     {
-        Logger.info("receiveClientEvent()");
         if (id == ACTIVE_STATE_CHANGED) {
             isActive = type == 1;
             Logger.info("Active state of chunk loader at %s is now %b", pos, isActive);
