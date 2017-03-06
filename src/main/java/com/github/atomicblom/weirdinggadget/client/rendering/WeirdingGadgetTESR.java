@@ -43,11 +43,11 @@ public class WeirdingGadgetTESR extends TileEntitySpecialRenderer<WeirdingGadget
         RenderHelper.disableStandardItemLighting();
         GlStateManager.pushMatrix();
 
-        GlStateManager.translate(0, 0, 1);
+        GlStateManager.translate(1, 0, 1);
         GlStateManager.translate(x, y, z);
-        GlStateManager.translate(0.5f, 0, -0.5f);
+        GlStateManager.translate(-0.5f, 0, -0.5f);
         GlStateManager.rotate(angle, 0, 1, 0);
-        GlStateManager.translate(0.5f, 0, -0.5f);
+        GlStateManager.translate(-0.5f, 0, -0.5f);
 
         vertexBufferUploader.draw(vertexBuffer);
         GlStateManager.popMatrix();
