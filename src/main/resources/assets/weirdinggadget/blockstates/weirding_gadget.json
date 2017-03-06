@@ -9,10 +9,14 @@
   },
   "variants": {
     "normal": [{
+      "transform": {
+        "translation": [ 0, 0, 0 ]
+      }
     }],
     "inventory": [{
       "transform": {
         "gui": {
+          "translation": [ 0, 0, 0 ],
           "rotation": [{"x": 30}, {"y": 225}],
           "scale": 0.625
         },

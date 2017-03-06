@@ -91,9 +91,9 @@ public enum OpenGEXModelLoader implements ICustomModelLoader {
 
         if (scene.getMetrics().getUp() == Axis.Z) {
             float[] cycleMatrix = {
-                    0, 1, 0, 0,
                     0, 0, 1, 0,
                     1, 0, 0, 0,
+                    0, 1, 0, 0,
                     0, 0, 0, 1
             };
 
