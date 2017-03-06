@@ -6,6 +6,7 @@ import com.github.atomicblom.weirdinggadget.TicketUtils;
 import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -94,7 +95,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
             if (expireTime == -1)
             {
                 final int timeout = Settings.hoursBeforeDeactivation * WeirdingGadgetMod.MULTIPLIER;
-                //int timeout = 10 * 20;
+                //final int timeout = 10 * 20;
                 expireTime = totalWorldTime + timeout;
                 Logger.info("Player %s has gone offline. Ticket is scheduled to expire at world time %d", ticket.getPlayerName(), expireTime);
             }
@@ -111,6 +112,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
     @Override
     public void readFromNBT(NBTTagCompound compound)
     {
+        Logger.info("readFromNBT()");
         super.readFromNBT(compound);
         expireTime = compound.hasKey("expireTime") ? compound.getLong("expireTime") : -1;
     }
@@ -118,6 +120,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
+        Logger.info("writeToNBT()");
         super.writeToNBT(compound);
         compound.setLong("expireTime", expireTime);
         return compound;
@@ -126,6 +129,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
     @Override
     public boolean receiveClientEvent(int id, int type)
     {
+        Logger.info("receiveClientEvent()");
         if (id == ACTIVE_STATE_CHANGED) {
             isActive = type == 1;
             Logger.info("Active state of chunk loader at %s is now %b", pos, isActive);
@@ -133,6 +137,21 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
             return true;
         }
         return false;
+    }
+
+    @Override
+    public NBTTagCompound getUpdateTag()
+    {
+        final NBTTagCompound updateTag = super.getUpdateTag();
+        updateTag.setBoolean("isActive", isActive);
+        return updateTag;
+    }
+
+    @Override
+    public void handleUpdateTag(NBTTagCompound tag)
+    {
+        isActive = tag.getBoolean("isActive");
+        super.handleUpdateTag(tag);
     }
 
     public boolean isExpired()

@@ -115,6 +115,7 @@ public class OpenGEXModel implements IRetexturableModel, IModelCustomData, IMode
             String location = getLocation(path);
             builder.put(path, new ResourceLocation(location));
         }
+        builder.put("particle", new ResourceLocation("#particle"));
         return builder.build();
     }
 

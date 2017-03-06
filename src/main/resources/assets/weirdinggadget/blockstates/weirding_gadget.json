@@ -4,7 +4,8 @@
     "transform": "forge:default-block",
     "model": "weirdinggadget:ss_chunk_loader.ogex",
     "textures": {
-      "#sschunkl": "weirdinggadget:models/sschunkl"
+      "#sschunkl": "weirdinggadget:models/sschunkl",
+      "#particle": "weirdinggadget:models/sschunkl_particle"
     }
   },
   "variants": {

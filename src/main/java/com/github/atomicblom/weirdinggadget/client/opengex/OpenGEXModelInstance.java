@@ -311,7 +311,11 @@ public class OpenGEXModelInstance implements IPerspectiveAwareModel
 
     @Override
     public TextureAtlasSprite getParticleTexture() {
-        return textures.values().asList().get(0);
+        TextureAtlasSprite particle = textures.get("particle");
+        if (particle == null) {
+            particle = textures.values().asList().get(0);
+        }
+        return particle;
     }
 
     @Override
