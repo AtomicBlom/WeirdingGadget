@@ -1,25 +1,17 @@
 package com.github.atomicblom.weirdinggadget.registration;
 
 import com.github.atomicblom.weirdinggadget.Reference;
-import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
-import com.github.atomicblom.weirdinggadget.block.TileEntity.WeirdingGadgetTileEntity;
+import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
 import com.github.atomicblom.weirdinggadget.block.WeirdingGadgetBlock;
 import com.github.atomicblom.weirdinggadget.library.BlockLibrary;
-import com.github.atomicblom.weirdinggadget.library.ItemLibrary;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.client.model.ModelLoaderRegistry;
-import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;

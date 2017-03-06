@@ -1,4 +1,4 @@
-package com.github.atomicblom.weirdinggadget.block.TileEntity;
+package com.github.atomicblom.weirdinggadget.block.tileentity;
 
 import com.github.atomicblom.weirdinggadget.Logger;
 import com.github.atomicblom.weirdinggadget.Settings;
@@ -17,13 +17,18 @@ import java.lang.ref.WeakReference;
 public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
 {
 
+    public WeirdingGadgetTileEntity()
+    {
+        ticket = null;
+    }
+
     private static final int ACTIVE_STATE_CHANGED = 1;
 
     @Nullable
     private Ticket ticket;
 
     @Nonnull
-    private WeakReference<EntityPlayer> placer = new WeakReference<EntityPlayer>(null);
+    private WeakReference<EntityPlayer> placer = new WeakReference<>(null);
 
     private long expireTime = -1;
 
@@ -48,11 +53,11 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
 
     public void setPlacer(@Nullable EntityPlayer placer)
     {
-        this.placer = new WeakReference<EntityPlayer>(placer);
+        this.placer = new WeakReference<>(placer);
     }
 
     @Nullable
-    public EntityPlayer getPlacer()
+    private EntityPlayer getPlacer()
     {
         return placer.get();
     }
@@ -67,20 +72,20 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
             return;
         }
 
-        EntityPlayer placer = getPlacer();
-        if (placer != null) {
-            placer = TicketUtils.getOnlinePlayerByName(world.getMinecraftServer(), placer.getName());
+        EntityPlayer player = getPlacer();
+        if (player != null) {
+            player = TicketUtils.getOnlinePlayerByName(world.getMinecraftServer(), player.getName());
 
-            if (placer == null) {
-                this.placer.clear();
+            if (player == null) {
+                placer.clear();
             }
         }
 
-        if (placer == null && ticket != null) {
+        if (player == null && ticket != null) {
             final EntityPlayer playerEntityByName = TicketUtils.getOnlinePlayerByName(world.getMinecraftServer(), ticket.getPlayerName());
             if (playerEntityByName != null) {
                 expireTime = -1;
-                this.placer = new WeakReference<EntityPlayer>(playerEntityByName);
+                placer = new WeakReference<>(playerEntityByName);
                 Logger.info("Chunk Loader at %s is revived because %s returned", pos, playerEntityByName.getName());
                 world.addBlockEvent(pos, getBlockType(), ACTIVE_STATE_CHANGED, 1);
                 return;
@@ -88,7 +93,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
 
             if (expireTime == -1)
             {
-                int timeout = Settings.hoursBeforeDeactivation * WeirdingGadgetMod.MULTIPLIER;
+                final int timeout = Settings.hoursBeforeDeactivation * WeirdingGadgetMod.MULTIPLIER;
                 //int timeout = 10 * 20;
                 expireTime = totalWorldTime + timeout;
                 Logger.info("Player %s has gone offline. Ticket is scheduled to expire at world time %d", ticket.getPlayerName(), expireTime);

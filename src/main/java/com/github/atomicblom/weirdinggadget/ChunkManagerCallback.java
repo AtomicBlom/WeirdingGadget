@@ -5,12 +5,13 @@ import com.google.common.collect.ListMultimap;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.common.ForgeChunkManager.PlayerOrderedLoadingCallback;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 
-public class ChunkManagerCallback implements ForgeChunkManager.PlayerOrderedLoadingCallback
+public class ChunkManagerCallback implements PlayerOrderedLoadingCallback
 {
     @Override
     public void ticketsLoaded(List<Ticket> tickets, World world)

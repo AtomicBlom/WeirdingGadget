@@ -3,7 +3,7 @@ package com.github.atomicblom.weirdinggadget.block;
 import com.github.atomicblom.weirdinggadget.TicketUtils;
 import com.github.atomicblom.weirdinggadget.Settings;
 import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
-import com.github.atomicblom.weirdinggadget.block.TileEntity.WeirdingGadgetTileEntity;
+import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
 import com.github.atomicblom.weirdinggadget.client.opengex.OpenGEXAnimationFrameProperty;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -27,6 +27,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
+import net.minecraftforge.common.ForgeChunkManager.Type;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import javax.annotation.Nullable;
@@ -55,6 +56,7 @@ public class WeirdingGadgetBlock extends Block
     }
 
     @Override
+    @Deprecated
     public IBlockState getStateFromMeta(int meta)
     {
         return getDefaultState();
@@ -76,9 +78,9 @@ public class WeirdingGadgetBlock extends Block
         activateChunkLoader(worldIn, pos, (EntityPlayer)placer);
     }
 
-    private void activateChunkLoader(World worldIn, BlockPos pos, EntityPlayer placer)
+    private static void activateChunkLoader(World worldIn, BlockPos pos, EntityPlayer placer)
     {
-        final Ticket ticket = ForgeChunkManager.requestPlayerTicket(WeirdingGadgetMod.INSTANCE, "" + placer.getName(), worldIn, ForgeChunkManager.Type.NORMAL);
+        final Ticket ticket = ForgeChunkManager.requestPlayerTicket(WeirdingGadgetMod.INSTANCE, placer.getName(), worldIn, Type.NORMAL);
 
         if (ticket == null) {
             //Player has requested too many tickets. Forge will log an issue here.
@@ -99,6 +101,7 @@ public class WeirdingGadgetBlock extends Block
         if (worldIn.isRemote) {return true;}
 
         final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)worldIn.getTileEntity(pos);
+        if (tileEntity == null) return false;
 
         if (tileEntity.isExpired()) {
 
@@ -133,6 +136,7 @@ public class WeirdingGadgetBlock extends Block
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
         final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)worldIn.getTileEntity(pos);
+        if (tileEntity == null) return;
 
         final Ticket ticket = tileEntity.getTicket();
         ForgeChunkManager.releaseTicket(ticket);
@@ -157,17 +161,20 @@ public class WeirdingGadgetBlock extends Block
     @Override
     @Deprecated
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-        float one_pixel = 1/16f;
+        final float onePixel = 1/16.0f;
 
-        return new AxisAlignedBB(3*one_pixel, 0, 3*one_pixel, 1-(3*one_pixel), 1, 1-(3*one_pixel));
+        return new AxisAlignedBB(3*onePixel, 0, 3*onePixel, 1- 3*onePixel, 1, 1- 3*onePixel);
     }
 
     ///////////// Networking /////////////////
 
     @Override
+    @Deprecated
     public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param)
     {
         final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)worldIn.getTileEntity(pos);
+        if (tileEntity == null) return false;
+
         tileEntity.receiveClientEvent(id, param);
         return true;
     }
