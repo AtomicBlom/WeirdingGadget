@@ -42,7 +42,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         }
 
         this.ticket = ticket;
-        world.addBlockEvent(pos, getBlockType(), ACTIVE_STATE_CHANGED, 1);
+        worldObj.addBlockEvent(pos, getBlockType(), ACTIVE_STATE_CHANGED, 1);
         expireTime = -1;
         Logger.info("Waking up Chunk Loader at %s because %s placed/interacted with it", pos, ticket.getPlayerName());
     }
@@ -66,16 +66,16 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
     @Override
     public void update()
     {
-        if (world.isRemote) return;
+        if (worldObj.isRemote) return;
         if (ticket == null) return;
-        final long totalWorldTime = world.getTotalWorldTime();
+        final long totalWorldTime = worldObj.getTotalWorldTime();
         if ((totalWorldTime & 31) != 31) {
             return;
         }
 
         EntityPlayer player = getPlacer();
         if (player != null) {
-            player = TicketUtils.getOnlinePlayerByName(world.getMinecraftServer(), player.getName());
+            player = TicketUtils.getOnlinePlayerByName(worldObj.getMinecraftServer(), player.getName());
 
             if (player == null) {
                 placer.clear();
@@ -83,12 +83,12 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         }
 
         if (player == null && ticket != null) {
-            final EntityPlayer playerEntityByName = TicketUtils.getOnlinePlayerByName(world.getMinecraftServer(), ticket.getPlayerName());
+            final EntityPlayer playerEntityByName = TicketUtils.getOnlinePlayerByName(worldObj.getMinecraftServer(), ticket.getPlayerName());
             if (playerEntityByName != null) {
                 expireTime = -1;
                 placer = new WeakReference<>(playerEntityByName);
                 Logger.info("Chunk Loader at %s is revived because %s returned", pos, playerEntityByName.getName());
-                world.addBlockEvent(pos, getBlockType(), ACTIVE_STATE_CHANGED, 1);
+                worldObj.addBlockEvent(pos, getBlockType(), ACTIVE_STATE_CHANGED, 1);
                 return;
             }
 
@@ -105,7 +105,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
             Logger.info("Ticket for Weirding Gadget at %s has expired.", pos);
             ForgeChunkManager.releaseTicket(ticket);
             ticket = null;
-            world.addBlockEvent(pos, getBlockType(), ACTIVE_STATE_CHANGED, 0);
+            worldObj.addBlockEvent(pos, getBlockType(), ACTIVE_STATE_CHANGED, 0);
         }
     }
 

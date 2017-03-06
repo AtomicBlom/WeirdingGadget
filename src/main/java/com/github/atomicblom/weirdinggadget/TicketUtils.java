@@ -67,7 +67,7 @@ public class TicketUtils {
         }
         final PlayerList playerList = server.getPlayerList();
 
-        for (final EntityPlayerMP entityPlayerMP : playerList.getPlayers())
+        for (final EntityPlayerMP entityPlayerMP : playerList.getPlayerList())
         {
             if (playerName.equals(entityPlayerMP.getName())) {
                 locatedPlayer = entityPlayerMP;
