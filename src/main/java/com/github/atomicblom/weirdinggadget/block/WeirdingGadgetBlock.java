@@ -13,6 +13,7 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -31,6 +32,7 @@ import net.minecraftforge.common.ForgeChunkManager.Type;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class WeirdingGadgetBlock extends Block
 {
@@ -53,6 +55,11 @@ public class WeirdingGadgetBlock extends Block
     protected BlockStateContainer createBlockState()
     {
         return new ExtendedBlockState(this, new IProperty[]{RENDER_DYNAMIC}, new IUnlistedProperty[]{OpenGEXAnimationFrameProperty.instance});
+    }
+
+    @Override
+    public void addInformation(ItemStack stack, EntityPlayer player, List<String> tooltip, boolean advanced) {
+        tooltip.add(I18n.format("tile.weirdinggadget:weirding_gadget.tooltip"));
     }
 
     @Override
