@@ -32,6 +32,10 @@ public class ChunkManagerCallback implements PlayerOrderedLoadingCallback
     {
         final ListMultimap<String, Ticket> returnedTickets = ArrayListMultimap.create();
 
+        if (Settings.emergencyMode) {
+            return returnedTickets;
+        }
+
         for (final Entry<String, Collection<Ticket>> playerTicketMap : tickets.asMap().entrySet())
         {
             final String player = playerTicketMap.getKey();

@@ -11,4 +11,7 @@ public class Settings {
 
     @Comment("Width/length of chunks to be loaded, it is recommend this is an odd number")
     public static int chunkLoaderWidth = 3;
+
+    @Comment("Disables Chunk loading, use if there is a crash happening in a chunk loaded area")
+    public static boolean emergencyMode = false;
 }
