@@ -1,8 +1,6 @@
 package com.github.atomicblom.weirdinggadget.client.opengex;
 
 import com.github.atomicblom.weirdinggadget.client.opengex.ogex.*;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.*;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.JsonElement;
@@ -12,15 +10,13 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.IModel;
-import net.minecraftforge.client.model.IModelCustomData;
-import net.minecraftforge.client.model.IModelSimpleProperties;
-import net.minecraftforge.client.model.IRetexturableModel;
 import net.minecraftforge.common.model.IModelState;
 import net.minecraftforge.fml.common.FMLLog;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Function;
 
-public class OpenGEXModel implements IRetexturableModel, IModelCustomData, IModelSimpleProperties
+public class OpenGEXModel implements IModel
 {
     //FIXME: Is there somewhere more appropriate for this?
     public static OgexTexture white;
@@ -137,15 +133,12 @@ public class OpenGEXModel implements IRetexturableModel, IModelCustomData, IMode
 
     @Override
     public Collection<ResourceLocation> getTextures() {
-        return Collections2.filter(getTextureMap().values(), new Predicate<ResourceLocation>() {
-            public boolean apply(ResourceLocation loc) {
-                return !loc.getResourcePath().startsWith("#");
-            }
-        });
+        return Collections2.filter(getTextureMap().values(), loc -> !loc.getResourcePath().startsWith("#"));
     }
 
     @Override
-    public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter) {
+    public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter)
+    {
         Builder<String, TextureAtlasSprite> builder = ImmutableMap.builder();
         TextureAtlasSprite missing = bakedTextureGetter.apply(new ResourceLocation("missingno"));
 

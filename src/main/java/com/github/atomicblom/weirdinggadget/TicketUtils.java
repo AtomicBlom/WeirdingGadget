@@ -40,10 +40,10 @@ public class TicketUtils {
 
         final ChunkPos chunk = new ChunkPos(pos);
 
-        int minX = chunk.chunkXPos - (int)(size / 2.0f);
-        int maxX = chunk.chunkXPos + (int)((size - 1) / 2.0f);
-        int minZ = chunk.chunkZPos - (int)(size/ 2.0f);
-        int maxZ = chunk.chunkZPos + (int)((size - 1) / 2.0f);
+        int minX = chunk.x - (int)(size / 2.0f);
+        int maxX = chunk.x + (int)((size - 1) / 2.0f);
+        int minZ = chunk.z - (int)(size/ 2.0f);
+        int maxZ = chunk.z + (int)((size - 1) / 2.0f);
 
         for (int z = minZ; z <= maxZ; ++z) {
             for (int x = minX; x <= maxX; ++x) {

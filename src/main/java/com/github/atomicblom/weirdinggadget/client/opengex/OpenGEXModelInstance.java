@@ -3,7 +3,7 @@ package com.github.atomicblom.weirdinggadget.client.opengex;
 import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
 import com.github.atomicblom.weirdinggadget.block.WeirdingGadgetBlock;
 import com.github.atomicblom.weirdinggadget.client.opengex.ogex.*;
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
-import net.minecraftforge.client.model.IPerspectiveAwareModel;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.pipeline.LightUtil;
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
@@ -32,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 //@SuppressWarnings("deprecation") //Seriously, screw deprecated methods on interfaces. I *HATE* having to do this.
-public class OpenGEXModelInstance implements IPerspectiveAwareModel
+public class OpenGEXModelInstance implements IBakedModel
 {
     private final OpenGEXModel model;
     private final IModelState state;
@@ -69,7 +68,7 @@ public class OpenGEXModelInstance implements IPerspectiveAwareModel
                 animationTime = ((OpenGEXState) state).getTime();
             }
 
-            final Optional<TRSRTransformation> globalTransform = state.apply(Optional.<IModelPart>absent());
+            final Optional<TRSRTransformation> globalTransform = state.apply(Optional.empty());
 
             float[][] nodeMatrices = this.nodeMatrices;
             if (nodeMatrices == null)
@@ -323,12 +322,6 @@ public class OpenGEXModelInstance implements IPerspectiveAwareModel
     public net.minecraft.client.renderer.block.model.ItemCameraTransforms getItemCameraTransforms()
     {
         return net.minecraft.client.renderer.block.model.ItemCameraTransforms.DEFAULT;
-    }
-
-    @Override
-    public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType cameraTransformType)
-    {
-        return IPerspectiveAwareModel.MapWrapper.handlePerspective(this, state, cameraTransformType);
     }
 
     public OpenGEXModelInstance getAnimatedModel(IBlockState state)

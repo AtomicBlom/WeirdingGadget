@@ -16,7 +16,7 @@ import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.common.registry.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistry;
 
 //@EventBusSubscriber(modid = WeirdingGadgetMod.MODID)
 @EventBusSubscriber
@@ -39,13 +39,14 @@ public class Registration
 
     private static void registerRecipes()
     {
-        GameRegistry.addRecipe(new ItemStack(BlockLibrary.weirding_gadget),
+        /*GameRegistry.addRecipe(new ItemStack(BlockLibrary.weirding_gadget),
                 new String[] {"ggg", "GeG", "GiG"},
                 'g', Items.GOLD_INGOT,
                 'G', Blocks.GOLD_BLOCK,
                 'i', Items.IRON_INGOT,
                 'e', Items.ENDER_EYE
                 );
+                */
     }
 
     static <B extends Block> B configure(B block, ResourceLocation registryName) {

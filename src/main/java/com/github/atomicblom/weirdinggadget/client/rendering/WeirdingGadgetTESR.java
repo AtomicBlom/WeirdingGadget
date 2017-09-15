@@ -14,11 +14,11 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 
 public class WeirdingGadgetTESR extends TileEntitySpecialRenderer<WeirdingGadgetTileEntity>
 {
-    private ReusableVertexBuffer vertexBuffer = null;
+    private ReusableBufferBuilder vertexBuffer = null;
     private final WorldVertexBufferUploader vertexBufferUploader = new WorldVertexBufferUploader();
 
     @Override
-    public void renderTileEntityAt(WeirdingGadgetTileEntity te, double x, double y, double z, float partialTicks, int destroyStage)
+    public void render(WeirdingGadgetTileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
         if (vertexBuffer == null)
         {
@@ -27,7 +27,7 @@ public class WeirdingGadgetTESR extends TileEntitySpecialRenderer<WeirdingGadget
             blockState = blockState.withProperty(WeirdingGadgetBlock.RENDER_DYNAMIC, true);
             final IBakedModel model = blockRenderer.getModelForState(blockState);
 
-            vertexBuffer = new ReusableVertexBuffer(2097152);
+            vertexBuffer = new ReusableBufferBuilder(2097152);
             vertexBuffer.writeModel(model, blockState);
         }
         float angle = 0;

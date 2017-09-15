@@ -1,7 +1,7 @@
 package com.github.atomicblom.weirdinggadget.client.opengex;
 
 import com.github.atomicblom.weirdinggadget.client.opengex.ogex.OgexAnimation;
-import com.google.common.base.Optional;
+import java.util.Optional;
 import net.minecraftforge.common.model.IModelPart;
 import net.minecraftforge.common.model.IModelState;
 import net.minecraftforge.common.model.TRSRTransformation;

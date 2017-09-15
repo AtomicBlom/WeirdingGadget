@@ -1,90 +1,85 @@
-import org.gradle.plugins.ide.idea.model.*
+import org.gradle.plugins.ide.idea.model.* 
 
-
-// define the properties file
-ext.configFile = file "build.properties"
-configFile.withReader {
-    // read config.  it shall from now on be referenced as simply config or as project.config
-    def prop = new Properties()
-    prop.load(it)
-    project.ext.config = new ConfigSlurper().parse prop
+// define the properties file 
+ext.configFile = file "gradle.properties"
+configFile.withReader { 
+    // read config.  it shall from now on be referenced as simply config or as project.config 
+    def prop = new Properties() 
+    prop.load(it) 
+    project.ext.config = new ConfigSlurper().parse prop 
 }
 
-// For those who want the bleeding edge
 buildscript {
     repositories {
         jcenter()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
+        maven { url = "http://files.minecraftforge.net/maven" }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
     }
 }
-apply plugin: 'java'
-apply plugin: 'idea'
+apply plugin: 'java' 
+apply plugin: 'idea' 
 apply plugin: 'net.minecraftforge.gradle.forge'
 
+///////////////////////////////////////////////////  
+// IDE Settings 
+/////////////////////////////////////////////////// 
 
-///////////////////////////////////////////////////
-// IDE Settings
-///////////////////////////////////////////////////
-idea {
-    project {
-        languageLevel = '1.8'
+/////////////////////////////////////////////////// 
+// ForgeGradle 
+/////////////////////////////////////////////////// 
+def isCIBuild = hasProperty("CIRevision")
+if (isCIBuild) {
+    println("Producing a Release build")
+} else {
+    println("This build will produce an unsactioned release")
+}
+version = (hasProperty("CIRevision") ? CIRevision : config.mod_version) 
+group = config.group_name 
+archivesBaseName = "${config.mod_id}-${config.minecraft_version}" 
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8 // Need this here so eclipse task generates correctly.
+compileJava {
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+minecraft {
+    version = config.minecraft_version + "-" + config.forge_version // grab latest forge 
+    runDir = "run"
+    
+    mappings = config.mcp_mappings 
+    makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable. 
+
+    replace '@MOD_VERSION@', version 
+    replace '@MOD_ID@', config.mod_id 
+    replace '@CI_BUILD@', hasProperty("CIRevision") ? 'true' : 'false' 
+}
+
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+                
+        // replace version and mcversion
+        expand ([ 
+            'version':project.version, 
+            'mcversion':project.minecraft.version, 
+            'forge_version': config.forge_version, 
+            'mod_version': config.mod_version, 
+            'minecraft_version': config.minecraft_version 
+        ])
+    }
+        
+    // copy everything else except the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
     }
 }
 
-///////////////////////////////////////////////////
-// ForgeGradle
-///////////////////////////////////////////////////
-version = (hasProperty("CIRevision") ? CIRevision : config.mod_version)
-group = config.group_name
-archivesBaseName = "${config.mod_id}-${config.minecraft_version}"
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
-minecraft {
-    version = config.minecraft_version + "-" + config.forge_version // grab latest forge
-    runDir = "run"
-
-    mappings = config.mcp_mappings
-    makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
-
-    replace '@MOD_VERSION@', version
-    replace '@MOD_ID@', config.mod_id
-    replace '@CI_BUILD@', hasProperty("CIRevision") ? 'true' : 'false'
-}
-
-processResources
-        {
-            // this will ensure that this task is redone when the versions change.
-            inputs.property "version", project.version
-            inputs.property "mcversion", project.minecraft.version
-
-            // replace stuff in mcmod.info, nothing else
-            from(sourceSets.main.resources.srcDirs) {
-                include '**/*.info'
-                include '**/*.properties'
-
-                // replace version and mcversion
-                expand ([
-                        'version':project.version,
-                        'mcversion':project.minecraft.version,
-                        'forge_version': config.forge_version,
-                        'mod_version': config.mod_version,
-                        'minecraft_version': config.minecraft_version
-                ])
-            }
-
-            // copy everything else, thats not the mcmod.info
-            from(sourceSets.main.resources.srcDirs) {
-                exclude 'mcmod.info'
-            }
-        }
-
-jar {
-    classifier = 'universal'
+jar { 
+    classifier = 'universal' 
 }

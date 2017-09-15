@@ -1,7 +1,7 @@
 package com.github.atomicblom.weirdinggadget.client.rendering;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -12,7 +12,8 @@ import org.lwjgl.opengl.GL11;
 /**
  * Created by codew on 20/12/2016.
  */
-class ReusableVertexBuffer extends VertexBuffer {
+class ReusableBufferBuilder extends BufferBuilder
+{
     private static final EnumFacing[] modelSources = {
             EnumFacing.UP,
             EnumFacing.DOWN,
@@ -23,7 +24,7 @@ class ReusableVertexBuffer extends VertexBuffer {
             null
     };
 
-    public ReusableVertexBuffer(int bufferSizeIn) {
+    public ReusableBufferBuilder(int bufferSizeIn) {
         super(bufferSizeIn);
     }
 
