@@ -57,7 +57,11 @@ public class TicketUtils {
 
         String playerName = ticket.getPlayerName();
 
-        tileEntity.setPlacer(getOnlinePlayerByName(world.getMinecraftServer(), playerName));
+        final EntityPlayerMP player = getOnlinePlayerByName(world.getMinecraftServer(), playerName);
+        if (player != null)
+        {
+            tileEntity.addTrackedPlayer(player);
+        }
     }
 
     public static EntityPlayerMP getOnlinePlayerByName(MinecraftServer server, String playerName) {

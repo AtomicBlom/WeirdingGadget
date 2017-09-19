@@ -112,7 +112,7 @@ public class WeirdingGadgetBlock extends Block
         final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)worldIn.getTileEntity(pos);
         if (tileEntity == null) return false;
 
-        if (tileEntity.isExpired()) {
+        if (tileEntity.isExpired() || !tileEntity.hasTicket(playerIn)) {
 
             activateChunkLoader(worldIn, pos, playerIn);
 
@@ -147,8 +147,8 @@ public class WeirdingGadgetBlock extends Block
         final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)worldIn.getTileEntity(pos);
         if (tileEntity == null) return;
 
-        final Ticket ticket = tileEntity.getTicket();
-        ForgeChunkManager.releaseTicket(ticket);
+        tileEntity.expireAllTickets();
+
         super.breakBlock(worldIn, pos, state);
     }
 
