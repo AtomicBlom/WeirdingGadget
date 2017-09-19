@@ -13,6 +13,7 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
@@ -23,6 +24,7 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -30,10 +32,14 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.ForgeChunkManager.Type;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Random;
 
 public class WeirdingGadgetBlock extends Block
 {
@@ -120,6 +126,38 @@ public class WeirdingGadgetBlock extends Block
         }
 
         return false;
+    }
+
+    //Later: Determine if the current player should get particles.
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
+    {
+        for (int x = -2; x <= 2; ++x)
+        {
+            for (int z = -2; z <= 2; ++z)
+            {
+                if (x > -2 && x < 2 && z == -1)
+                {
+                    z = 2;
+                }
+
+                if (worldIn.isAirBlock(pos.add(x / 2, 0, z / 2)))
+                {
+                    if (rand.nextInt(16) == 0)
+                    {
+                        for (int y = 0; y <= 1; ++y)
+                        {
+                            worldIn.spawnParticle(
+                                    EnumParticleTypes.ENCHANTMENT_TABLE,
+                                    pos.getX() + 0.5D, pos.getY() + 2.0D, pos.getZ() + 0.5D,
+                                    (x + rand.nextFloat()) - 0.5D, y - rand.nextFloat() - 1.0F, (z + rand.nextFloat()) - 0.5D
+                            );
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override
