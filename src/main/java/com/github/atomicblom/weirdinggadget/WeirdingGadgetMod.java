@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-@Mod(modid = WeirdingGadgetMod.MODID, version = WeirdingGadgetMod.VERSION)
+@Mod(modid = WeirdingGadgetMod.MODID, version = WeirdingGadgetMod.VERSION, dependencies = "required-after:forge@[14.22.0.2447,)")
 public class WeirdingGadgetMod
 {
     public static final String MODID = "weirdinggadget";
