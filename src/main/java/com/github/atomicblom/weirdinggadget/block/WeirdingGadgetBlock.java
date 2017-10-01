@@ -133,6 +133,10 @@ public class WeirdingGadgetBlock extends Block
     @Override
     public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
     {
+        final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)worldIn.getTileEntity(pos);
+        if (tileEntity == null) return;
+        if (!tileEntity.isActive()) return;
+
         for (int x = -2; x <= 2; ++x)
         {
             for (int z = -2; z <= 2; ++z)
