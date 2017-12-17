@@ -2,6 +2,7 @@ package com.github.atomicblom.weirdinggadget.client.rendering;
 
 import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
 import com.github.atomicblom.weirdinggadget.block.WeirdingGadgetBlock;
+import com.github.atomicblom.weirdinggadget.library.BlockLibrary;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
@@ -23,8 +24,7 @@ public class WeirdingGadgetTESR extends TileEntitySpecialRenderer<WeirdingGadget
         if (vertexBuffer == null)
         {
             final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
-            IBlockState blockState = te.getWorld().getBlockState(te.getPos());
-            blockState = blockState.withProperty(WeirdingGadgetBlock.RENDER_DYNAMIC, true);
+            IBlockState blockState = BlockLibrary.weirding_gadget.getDefaultState().withProperty(WeirdingGadgetBlock.RENDER_DYNAMIC, true);
             final IBakedModel model = blockRenderer.getModelForState(blockState);
 
             vertexBuffer = new ReusableBufferBuilder(2097152);
