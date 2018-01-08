@@ -24,6 +24,9 @@ public class OpenGEXState implements IModelState
 
     @Override
     public Optional<TRSRTransformation> apply(Optional<? extends IModelPart> part) {
+        if (state == null) {
+            return Optional.empty();
+        }
         return state.apply(part);
     }
 
