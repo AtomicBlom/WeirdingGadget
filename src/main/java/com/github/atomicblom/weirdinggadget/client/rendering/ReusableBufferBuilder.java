@@ -36,10 +36,9 @@ class ReusableBufferBuilder extends BufferBuilder
     public void writeModel(IBakedModel model, IBlockState state) {
         begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
 
-        final int color = 0xffffffff;
         for (final EnumFacing value : modelSources) {
             for (final BakedQuad quad : model.getQuads(state, value, 0)) {
-                LightUtil.renderQuadColor(this, quad, color);
+                addVertexData(quad.getVertexData());
             }
         }
         finishDrawing();
