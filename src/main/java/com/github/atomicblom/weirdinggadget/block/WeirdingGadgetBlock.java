@@ -1,21 +1,24 @@
 package com.github.atomicblom.weirdinggadget.block;
 
-import com.github.atomicblom.weirdinggadget.TicketUtils;
 import com.github.atomicblom.weirdinggadget.Settings;
+import com.github.atomicblom.weirdinggadget.TicketUtils;
 import com.github.atomicblom.weirdinggadget.WeirdingGadgetFuel;
 import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
 import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
 import com.github.atomicblom.weirdinggadget.client.opengex.OpenGEXAnimationFrameProperty;
+import com.github.atomicblom.weirdinggadget.library.BlockLibrary;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -24,6 +27,7 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -35,12 +39,14 @@ import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.ForgeChunkManager.Type;
 import net.minecraftforge.common.property.ExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
+
 import javax.annotation.Nullable;
 import java.util.List;
 
 public class WeirdingGadgetBlock extends Block
 {
     public static final PropertyBool RENDER_DYNAMIC = PropertyBool.create("render_dynamic");
+    public static final PropertyEnum<ChunkLoaderType> LOADER_TYPE =  PropertyEnum.create("type", ChunkLoaderType.class);
 
     public WeirdingGadgetBlock()
     {
@@ -48,6 +54,7 @@ public class WeirdingGadgetBlock extends Block
         setDefaultState(
                 blockState
                         .getBaseState()
+                        .withProperty(LOADER_TYPE, ChunkLoaderType.NORMAL)
                         .withProperty(RENDER_DYNAMIC, false)
         );
         setHardness(3.0f);
@@ -56,9 +63,19 @@ public class WeirdingGadgetBlock extends Block
     }
 
     @Override
+    public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items) {
+        items.add(new ItemStack(this, 1, ChunkLoaderType.NORMAL.getMetadata()));
+        items.add(new ItemStack(this, 1, ChunkLoaderType.SPOT.getMetadata()));
+    }
+
+    @Override
     protected BlockStateContainer createBlockState()
     {
-        return new ExtendedBlockState(this, new IProperty[]{RENDER_DYNAMIC}, new IUnlistedProperty[]{OpenGEXAnimationFrameProperty.instance});
+        return new ExtendedBlockState(
+                this,
+                new IProperty[]{RENDER_DYNAMIC, LOADER_TYPE},
+                new IUnlistedProperty[]{OpenGEXAnimationFrameProperty.instance}
+                );
     }
 
     @Override
@@ -71,13 +88,19 @@ public class WeirdingGadgetBlock extends Block
     @Deprecated
     public IBlockState getStateFromMeta(int meta)
     {
-        return getDefaultState();
+        if (meta > 1) meta = 0;
+        return getDefaultState().withProperty(LOADER_TYPE, ChunkLoaderType.byMetadata(meta));
     }
 
     @Override
     public int getMetaFromState(IBlockState state)
     {
-        return 0;
+        return state.getValue(LOADER_TYPE).getMetadata();
+    }
+
+    @Override
+    public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, EnumHand hand) {
+        return getDefaultState().withProperty(LOADER_TYPE, ChunkLoaderType.byMetadata(meta));
     }
 
     @Override
@@ -100,9 +123,14 @@ public class WeirdingGadgetBlock extends Block
             return;
         }
 
+        IBlockState blockState = worldIn.getBlockState(pos);
+        if (blockState.getBlock() != BlockLibrary.weirding_gadget) return;
+
+        ChunkLoaderType loaderType = blockState.getValue(LOADER_TYPE);
+
         final NBTTagCompound modData = ticket.getModData();
         modData.setTag("blockPosition", NBTUtil.createPosTag(pos));
-        modData.setInteger("size", Settings.chunkLoaderWidth);
+        modData.setInteger("size", loaderType.getChunkDiameter());
 
         TicketUtils.activateTicket(worldIn, ticket);
     }

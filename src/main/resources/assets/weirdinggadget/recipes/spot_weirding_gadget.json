@@ -1,0 +1,24 @@
+{
+  "result": {
+    "item": "weirdinggadget:weirding_gadget",
+    "data": 1,
+    "count": 1
+  },
+  "pattern": [
+    "iii",
+    "IeI",
+    "IiI"
+  ],
+  "type": "forge:ore_shaped",
+  "key": {
+    "I": {
+      "item": "#BLOCK_OF_IRON"
+    },
+    "e": {
+      "item": "minecraft:ender_eye"
+    },
+    "i": {
+      "item": "#INGOT_OF_IRON"
+    }
+  }
+}

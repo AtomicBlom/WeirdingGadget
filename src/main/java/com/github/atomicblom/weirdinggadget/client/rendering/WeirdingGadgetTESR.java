@@ -1,34 +1,43 @@
 package com.github.atomicblom.weirdinggadget.client.rendering;
 
+import com.github.atomicblom.weirdinggadget.block.ChunkLoaderType;
 import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
 import com.github.atomicblom.weirdinggadget.block.WeirdingGadgetBlock;
 import com.github.atomicblom.weirdinggadget.library.BlockLibrary;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.WorldVertexBufferUploader;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.world.chunk.Chunk;
 
 public class WeirdingGadgetTESR extends TileEntitySpecialRenderer<WeirdingGadgetTileEntity>
 {
-    private ReusableBufferBuilder vertexBuffer = null;
+    private ReusableBufferBuilder normalVertexBuffer = null;
+    private ReusableBufferBuilder spotVertexBuffer = null;
     private final WorldVertexBufferUploader vertexBufferUploader = new WorldVertexBufferUploader();
 
     @Override
     public void render(WeirdingGadgetTileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha)
     {
-        if (vertexBuffer == null)
+        IBlockState blockState = te.getWorld().getBlockState(te.getPos());
+        ChunkLoaderType value = blockState.getValue(WeirdingGadgetBlock.LOADER_TYPE);
+        BufferBuilder renderingVertexBuffer = value == ChunkLoaderType.NORMAL ? normalVertexBuffer : spotVertexBuffer;
+        if (renderingVertexBuffer == null)
         {
             final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
-            IBlockState blockState = BlockLibrary.weirding_gadget.getDefaultState().withProperty(WeirdingGadgetBlock.RENDER_DYNAMIC, true);
+            blockState = blockState.withProperty(WeirdingGadgetBlock.RENDER_DYNAMIC, true);
             final IBakedModel model = blockRenderer.getModelForState(blockState);
 
-            vertexBuffer = new ReusableBufferBuilder(2097152);
+            ReusableBufferBuilder vertexBuffer = new ReusableBufferBuilder(2097152);
             vertexBuffer.writeModel(model, blockState);
+
+            if (value == ChunkLoaderType.NORMAL) {
+                renderingVertexBuffer = normalVertexBuffer = vertexBuffer;
+            } else if (value == ChunkLoaderType.SPOT) {
+                renderingVertexBuffer = spotVertexBuffer = vertexBuffer;
+            }
         }
         float angle = 0;
 
@@ -46,7 +55,7 @@ public class WeirdingGadgetTESR extends TileEntitySpecialRenderer<WeirdingGadget
         GlStateManager.rotate(angle, 0, 1, 0);
         GlStateManager.translate(-0.5f, 0, -0.5f);
 
-        vertexBufferUploader.draw(vertexBuffer);
+        vertexBufferUploader.draw(renderingVertexBuffer);
         GlStateManager.popMatrix();
         RenderHelper.enableStandardItemLighting();
     }

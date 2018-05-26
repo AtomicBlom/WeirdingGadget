@@ -24,16 +24,18 @@ public class ClientRegistration
         OpenGEXModelLoader.INSTANCE.addDomain(WeirdingGadgetMod.MODID);
         ModelLoaderRegistry.registerLoader(OpenGEXModelLoader.INSTANCE);
 
-        setItemModel(ItemLibrary.weirding_gadget);
-
         ClientRegistry.bindTileEntitySpecialRenderer(WeirdingGadgetTileEntity.class, new WeirdingGadgetTESR());
-    }
 
-    private static void setItemModel(Item item)
-    {
         ModelLoader.setCustomModelResourceLocation(
-                item,
+                ItemLibrary.weirding_gadget,
                 0,
-                new ModelResourceLocation(item.getRegistryName(), "inventory")
+                new ModelResourceLocation(ItemLibrary.weirding_gadget.getRegistryName(), "inventory,type=normal")
         );
-    }}
+
+        ModelLoader.setCustomModelResourceLocation(
+                ItemLibrary.weirding_gadget,
+                1,
+                new ModelResourceLocation(ItemLibrary.weirding_gadget.getRegistryName(), "inventory,type=spot")
+        );
+    }
+}

@@ -16,6 +16,13 @@
   {
     "ingredient": {
       "type": "forge:ore_dict",
+      "ore": "blockIron"
+    },
+    "name": "BLOCK_OF_IRON"
+  },
+  {
+    "ingredient": {
+      "type": "forge:ore_dict",
       "ore": "ingotIron"
     },
     "name": "INGOT_OF_IRON"

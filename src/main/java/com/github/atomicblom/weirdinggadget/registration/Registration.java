@@ -3,6 +3,7 @@ package com.github.atomicblom.weirdinggadget.registration;
 import com.github.atomicblom.weirdinggadget.Reference;
 import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
 import com.github.atomicblom.weirdinggadget.block.WeirdingGadgetBlock;
+import com.github.atomicblom.weirdinggadget.item.ItemWeirdingGadget;
 import com.github.atomicblom.weirdinggadget.library.BlockLibrary;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
@@ -32,7 +33,7 @@ public class Registration
     @SubscribeEvent
     public static void registerItems(Register<Item> event) {
         final IForgeRegistry<Item> registry = event.getRegistry();
-        registry.register(configureBlockItem(BlockLibrary.weirding_gadget));
+        registry.register(configureBlockItem(new ItemWeirdingGadget(BlockLibrary.weirding_gadget)).setHasSubtypes(true));
 
         registerRecipes();
     }
@@ -57,9 +58,9 @@ public class Registration
         return block;
     }
 
-    static <B extends Block> ItemBlock configureBlockItem(B block) {
+    static <B extends ItemBlock> ItemBlock configureBlockItem(B itemBlock) {
 
-        ItemBlock itemBlock = new ItemBlock(block);
+        Block block = itemBlock.getBlock();
         itemBlock.setRegistryName(block.getRegistryName())
                 .setTranslationKey(block.getTranslationKey())
                 .setCreativeTab(CreativeTabs.MISC);

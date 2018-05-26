@@ -35,7 +35,14 @@ public class TicketUtils {
         NBTTagCompound modData = ticket.getModData();
         BlockPos pos = NBTUtil.getPosFromTag(modData.getCompoundTag("blockPosition"));
         TileEntity te = world.getTileEntity(pos);
+
+        if (!(te instanceof WeirdingGadgetTileEntity)) {
+            Logger.info("Warning: expected a weirding gadget at %s", pos.toString());
+            return;
+        }
+
         WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)te;
+
         int size = modData.getInteger("size");
 
         final ChunkPos chunk = new ChunkPos(pos);
