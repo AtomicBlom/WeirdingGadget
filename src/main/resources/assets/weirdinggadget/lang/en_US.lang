@@ -1,2 +1,3 @@
 tile.weirdinggadget:weirding_gadget.name=Weirding Gadget
 tile.weirdinggadget:weirding_gadget.tooltip=Chunk Loader
+tile.weirdinggadget:weirding_gadget.time_remaining=%d Days, %d Hours, %d Minutes remaining
