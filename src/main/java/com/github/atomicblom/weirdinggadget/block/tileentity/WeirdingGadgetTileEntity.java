@@ -7,7 +7,6 @@ import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -15,7 +14,6 @@ import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,6 +31,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
     private long expireTime = -1;
 
     private boolean isActive;
+    private long fuelExpireTime;
 
     public void setTicket(@Nonnull Ticket ticket)
     {
@@ -65,6 +64,17 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         trackedPlayers.add(new WeakReference<>(player));
     }
 
+    public void addFuelTicks(int ticks)
+    {
+        //TODO: spider loaders and split accordingly
+        long totalWorldTime = world.getTotalWorldTime();
+        if (fuelExpireTime < totalWorldTime) {
+            fuelExpireTime = totalWorldTime + ticks;
+        } else {
+            fuelExpireTime += ticks;
+        }
+    }
+
     @Override
     public void update()
     {
@@ -79,6 +89,12 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         final long totalWorldTime = world.getTotalWorldTime();
         if ((totalWorldTime & 31) != 31) {
             return;
+        }
+
+        if (Settings.enableFuel && fuelExpireTime < world.getTotalWorldTime()) {
+            Logger.info("Fuel has expired for weirding gadget at %s", pos);
+
+            disable();
         }
 
         boolean noTrackedPlayers = true;
@@ -144,15 +160,19 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         //It's time to kill the ticket.
         if (expireTime != -1 && totalWorldTime >= expireTime) {
             Logger.info("Ticket for Weirding Gadget at %s has expired.", pos);
-            for (final Ticket ticket : tickets)
-            {
-                ForgeChunkManager.releaseTicket(ticket);
-            }
-            tickets.clear();
-
-            //Disable the animation
-            world.addBlockEvent(pos, getBlockType(), ACTIVE_STATE_CHANGED, 0);
+            disable();
         }
+    }
+
+    private void disable() {
+        for (final Ticket ticket : tickets)
+        {
+            ForgeChunkManager.releaseTicket(ticket);
+        }
+        tickets.clear();
+
+        //Disable the animation
+        world.addBlockEvent(pos, getBlockType(), ACTIVE_STATE_CHANGED, 0);
     }
 
     @Override
@@ -160,6 +180,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
     {
         super.readFromNBT(compound);
         expireTime = compound.hasKey("expireTime") ? compound.getLong("expireTime") : -1;
+        fuelExpireTime = compound.hasKey("fuelExpireTime") ? compound.getLong("fuelExpireTime") : -1;
     }
 
     @Override
@@ -167,6 +188,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
     {
         super.writeToNBT(compound);
         compound.setLong("expireTime", expireTime);
+        compound.setLong("fuelExpireTime", fuelExpireTime);
         return compound;
     }
 
@@ -225,5 +247,18 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         }
         tickets.clear();
         trackedPlayers.clear();
+    }
+
+    public boolean canActivate()
+    {
+        return !Settings.enableFuel || fuelExpireTime > world.getTotalWorldTime();
+    }
+
+    public long getFuelTicks()
+    {
+        long totalWorldTime = world.getTotalWorldTime();
+        long ticksRemaining = fuelExpireTime - totalWorldTime;
+        if (ticksRemaining < 0) ticksRemaining = 0;
+        return ticksRemaining;
     }
 }

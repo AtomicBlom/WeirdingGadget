@@ -320,13 +320,6 @@ public class OpenGEXModelInstance implements IBakedModel
         return particle;
     }
 
-    @Override
-    @Deprecated
-    public net.minecraft.client.renderer.block.model.ItemCameraTransforms getItemCameraTransforms()
-    {
-        return net.minecraft.client.renderer.block.model.ItemCameraTransforms.DEFAULT;
-    }
-
     public OpenGEXModelInstance getAnimatedModel(IBlockState state)
     {
         if (state instanceof IExtendedBlockState)

@@ -2,6 +2,7 @@ package com.github.atomicblom.weirdinggadget.block;
 
 import com.github.atomicblom.weirdinggadget.TicketUtils;
 import com.github.atomicblom.weirdinggadget.Settings;
+import com.github.atomicblom.weirdinggadget.WeirdingGadgetFuel;
 import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
 import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
 import com.github.atomicblom.weirdinggadget.client.opengex.OpenGEXAnimationFrameProperty;
@@ -23,8 +24,10 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -83,8 +86,9 @@ public class WeirdingGadgetBlock extends Block
         if (!(placer instanceof EntityPlayer)) {
             return;
         }
-
-        activateChunkLoader(worldIn, pos, (EntityPlayer)placer);
+        if (!Settings.enableFuel) {
+            activateChunkLoader(worldIn, pos, (EntityPlayer) placer);
+        }
     }
 
     private static void activateChunkLoader(World worldIn, BlockPos pos, EntityPlayer placer)
@@ -95,7 +99,6 @@ public class WeirdingGadgetBlock extends Block
             //Player has requested too many tickets. Forge will log an issue here.
             return;
         }
-
 
         final NBTTagCompound modData = ticket.getModData();
         modData.setTag("blockPosition", NBTUtil.createPosTag(pos));
@@ -112,14 +115,48 @@ public class WeirdingGadgetBlock extends Block
         final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)worldIn.getTileEntity(pos);
         if (tileEntity == null) return false;
 
-        if (tileEntity.isExpired() || !tileEntity.hasTicket(playerIn)) {
+        boolean success = false;
+        if (Settings.enableFuel) {
+            final ItemStack heldItem = playerIn.getHeldItem(hand);
+            final ResourceLocation registryName = heldItem.getItem().getRegistryName();
+            assert registryName != null;
+            final String resourceDomain = registryName.getResourceDomain();
+            final String resourcePath = registryName.getResourcePath();
 
-            activateChunkLoader(worldIn, pos, playerIn);
+            for (final WeirdingGadgetFuel weirdingGadgetFuel : Settings.getFuelList())
+            {
+                if (resourceDomain.equals(weirdingGadgetFuel.domain) &&
+                        resourcePath.equals(weirdingGadgetFuel.item)) {
+                    if (weirdingGadgetFuel.ignoreMetadata || weirdingGadgetFuel.metadata == heldItem.getMetadata()) {
+                        tileEntity.addFuelTicks(weirdingGadgetFuel.ticks);
+                        if (!playerIn.isCreative()) {
+                            heldItem.shrink(1);
+                        }
+                        success = true;
+                        break;
+                    }
+                }
+            }
 
-            return true;
+            long ticksRemaining = tileEntity.getFuelTicks();
+            ticksRemaining /= (20 * 60); //ticks per minute
+
+            long minutes = ticksRemaining % 60;
+            ticksRemaining /= 60;
+            long hours = ticksRemaining % 24;
+            ticksRemaining /= 24;
+            long days = ticksRemaining;
+
+            playerIn.sendStatusMessage(new TextComponentTranslation("tile.weirdinggadget:weirding_gadget.time_remaining", days, hours, minutes), true);
         }
 
-        return false;
+        if (tileEntity.canActivate() && (tileEntity.isExpired() || !tileEntity.hasTicket(playerIn))) {
+            activateChunkLoader(worldIn, pos, playerIn);
+
+            success = true;
+        }
+
+        return success;
     }
 
     @Override
