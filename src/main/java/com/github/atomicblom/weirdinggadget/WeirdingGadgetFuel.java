@@ -9,10 +9,10 @@ public class WeirdingGadgetFuel {
 	public final  String domain;
 	public final String item;
 	public final int metadata;
-	public final int ticks;
+	public final long ticks;
 	public final boolean ignoreMetadata;
 
-	public WeirdingGadgetFuel(String domain, String item, int ticks)
+	public WeirdingGadgetFuel(String domain, String item, long ticks)
 	{
 		this.domain = domain;
 		this.item = item;
@@ -21,7 +21,7 @@ public class WeirdingGadgetFuel {
 		this.ignoreMetadata = true;
 	}
 
-	public WeirdingGadgetFuel(String domain, String item, int metadata, int ticks)
+	public WeirdingGadgetFuel(String domain, String item, int metadata, long ticks)
 	{
 		this.domain = domain;
 		this.item = item;
@@ -97,12 +97,7 @@ public class WeirdingGadgetFuel {
 		return metadata;
 	}
 
-	public int getTimeInTicks()
-	{
-		return ticks;
-	}
-
-	public String ToString() {
+	public String toString() {
 		long time = (ticks / 20 * 60);
 		char units = 'm';
 		long hours = (ticks / 20 * 60 * 60);

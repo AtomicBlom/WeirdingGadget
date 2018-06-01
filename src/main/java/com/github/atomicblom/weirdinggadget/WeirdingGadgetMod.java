@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap.Builder;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.util.datafix.IFixableData;
@@ -16,11 +15,13 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLInterModComms;
+import net.minecraftforge.fml.common.event.FMLInterModComms.IMCEvent;
+import net.minecraftforge.fml.common.event.FMLInterModComms.IMCMessage;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import java.util.Map;
 
+@SuppressWarnings("MethodMayBeStatic")
 @Mod(modid = WeirdingGadgetMod.MODID, version = WeirdingGadgetMod.VERSION, dependencies = "required-after:forge@[14.22.0.2447,)")
 public class WeirdingGadgetMod
 {
@@ -64,33 +65,33 @@ public class WeirdingGadgetMod
     }
 
     @EventHandler
-    public void receiveIMC(FMLInterModComms.IMCEvent event) {
-        for (final FMLInterModComms.IMCMessage message : event.getMessages())
+    public void receiveIMC(IMCEvent event) {
+        for (final IMCMessage message : event.getMessages())
         {
             String fuelDefinition = "";
             try {
                 if ("registerFuel".equals(message.key)) {
                     if (message.isNBTMessage()) {
-                        NBTTagCompound value = message.getNBTValue();
-                        ItemStack itemStack = new ItemStack(value);
-                        int hours = value.getInteger("hours");
+                        final NBTTagCompound value = message.getNBTValue();
+                        final ItemStack itemStack = new ItemStack(value);
+                        final int hours = value.getInteger("hours");
 
-                        Item item = itemStack.getItem();
-                        ResourceLocation registryName = item.getRegistryName();
+                        final Item item = itemStack.getItem();
+                        final ResourceLocation registryName = item.getRegistryName();
 
                         assert registryName != null;
 
 
-                        WeirdingGadgetFuel fuel = new WeirdingGadgetFuel(registryName.getResourceDomain(), registryName.getResourcePath(), itemStack.getMetadata(), hours);
+                        final WeirdingGadgetFuel fuel = new WeirdingGadgetFuel(registryName.getResourceDomain(), registryName.getResourcePath(), itemStack.getMetadata(), hours);
                         fuelDefinition = fuel.toString();
                         Settings.addModConfiguredFuel(fuel);
                     } else if (message.isStringMessage()) {
                         fuelDefinition = message.getStringValue();
-                        WeirdingGadgetFuel fuel = WeirdingGadgetFuel.fromConfig(fuelDefinition);
+                        final WeirdingGadgetFuel fuel = WeirdingGadgetFuel.fromConfig(fuelDefinition);
                         Settings.addModConfiguredFuel(fuel);
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 Logger.info("IMC: Unable to parse fuel %s: %s", fuelDefinition, e.getMessage());
             }
         }

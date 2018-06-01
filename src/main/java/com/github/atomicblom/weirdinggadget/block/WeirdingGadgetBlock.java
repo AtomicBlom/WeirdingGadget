@@ -1,9 +1,6 @@
 package com.github.atomicblom.weirdinggadget.block;
 
-import com.github.atomicblom.weirdinggadget.Settings;
-import com.github.atomicblom.weirdinggadget.TicketUtils;
-import com.github.atomicblom.weirdinggadget.WeirdingGadgetFuel;
-import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
+import com.github.atomicblom.weirdinggadget.*;
 import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
 import com.github.atomicblom.weirdinggadget.client.opengex.OpenGEXAnimationFrameProperty;
 import com.github.atomicblom.weirdinggadget.library.BlockLibrary;
@@ -123,10 +120,10 @@ public class WeirdingGadgetBlock extends Block
             return;
         }
 
-        IBlockState blockState = worldIn.getBlockState(pos);
+        final IBlockState blockState = worldIn.getBlockState(pos);
         if (blockState.getBlock() != BlockLibrary.weirding_gadget) return;
 
-        ChunkLoaderType loaderType = blockState.getValue(LOADER_TYPE);
+        final ChunkLoaderType loaderType = blockState.getValue(LOADER_TYPE);
 
         final NBTTagCompound modData = ticket.getModData();
         modData.setTag("blockPosition", NBTUtil.createPosTag(pos));
@@ -144,19 +141,21 @@ public class WeirdingGadgetBlock extends Block
         if (tileEntity == null) return false;
 
         boolean success = false;
+        long fuelPerChunkLoader = 0;
+        final Iterable<WeirdingGadgetTileEntity> chainedGadgets = GadgetSpider.getChainedGadgets(tileEntity);
+
         if (Settings.enableFuel) {
             final ItemStack heldItem = playerIn.getHeldItem(hand);
             final ResourceLocation registryName = heldItem.getItem().getRegistryName();
             assert registryName != null;
             final String resourceDomain = registryName.getResourceDomain();
             final String resourcePath = registryName.getResourcePath();
-
+            long fuelToAdd = 0;
             for (final WeirdingGadgetFuel weirdingGadgetFuel : Settings.getFuelList())
             {
-                if (resourceDomain.equals(weirdingGadgetFuel.domain) &&
-                        resourcePath.equals(weirdingGadgetFuel.item)) {
+                if (resourceDomain.equals(weirdingGadgetFuel.domain) && resourcePath.equals(weirdingGadgetFuel.item)) {
                     if (weirdingGadgetFuel.ignoreMetadata || weirdingGadgetFuel.metadata == heldItem.getMetadata()) {
-                        tileEntity.addFuelTicks(weirdingGadgetFuel.ticks);
+                        fuelToAdd = weirdingGadgetFuel.ticks;
                         if (!playerIn.isCreative()) {
                             heldItem.shrink(1);
                         }
@@ -166,20 +165,32 @@ public class WeirdingGadgetBlock extends Block
                 }
             }
 
+
+            int chunksLoaded = 0;
+            for (final WeirdingGadgetTileEntity chainedGadget : chainedGadgets)
+            {
+                chunksLoaded += chainedGadget.getLoaderRadius();
+            }
+            fuelPerChunkLoader = fuelToAdd / chunksLoaded;
+
             long ticksRemaining = tileEntity.getFuelTicks();
             ticksRemaining /= (20 * 60); //ticks per minute
 
-            long minutes = ticksRemaining % 60;
+            final long minutes = ticksRemaining % 60;
             ticksRemaining /= 60;
-            long hours = ticksRemaining % 24;
+            final long hours = ticksRemaining % 24;
             ticksRemaining /= 24;
-            long days = ticksRemaining;
+            final long days = ticksRemaining;
 
             playerIn.sendStatusMessage(new TextComponentTranslation("tile.weirdinggadget:weirding_gadget.time_remaining", days, hours, minutes), true);
         }
 
         if (tileEntity.canActivate() && (tileEntity.isExpired() || !tileEntity.hasTicket(playerIn))) {
-            activateChunkLoader(worldIn, pos, playerIn);
+            for (final WeirdingGadgetTileEntity chainedGadget : chainedGadgets)
+            {
+                chainedGadget.addFuelTicks(fuelPerChunkLoader);
+                activateChunkLoader(worldIn, chainedGadget.getPos(), playerIn);
+            }
 
             success = true;
         }

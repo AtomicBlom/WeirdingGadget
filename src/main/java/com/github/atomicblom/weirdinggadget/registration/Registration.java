@@ -7,11 +7,8 @@ import com.github.atomicblom.weirdinggadget.item.ItemWeirdingGadget;
 import com.github.atomicblom.weirdinggadget.library.BlockLibrary;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -19,7 +16,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 
-//@EventBusSubscriber(modid = WeirdingGadgetMod.MODID)
 @EventBusSubscriber
 public class Registration
 {
@@ -60,7 +56,7 @@ public class Registration
 
     static <B extends ItemBlock> ItemBlock configureBlockItem(B itemBlock) {
 
-        Block block = itemBlock.getBlock();
+        final Block block = itemBlock.getBlock();
         itemBlock.setRegistryName(block.getRegistryName())
                 .setTranslationKey(block.getTranslationKey())
                 .setCreativeTab(CreativeTabs.MISC);

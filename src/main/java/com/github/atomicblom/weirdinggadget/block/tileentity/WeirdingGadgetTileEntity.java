@@ -1,14 +1,15 @@
 package com.github.atomicblom.weirdinggadget.block.tileentity;
 
-import com.github.atomicblom.weirdinggadget.Logger;
-import com.github.atomicblom.weirdinggadget.Settings;
-import com.github.atomicblom.weirdinggadget.TicketUtils;
-import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
+import com.github.atomicblom.weirdinggadget.*;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import javax.annotation.Nonnull;
@@ -31,7 +32,9 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
     private long expireTime = -1;
 
     private boolean isActive;
-    private long fuelExpireTime;
+    private long fuelExpireTime = -1;
+    private boolean scheduleNeighbourCheck = true;
+    private List<BlockPos> nearbyGadgets;
 
     public void setTicket(@Nonnull Ticket ticket)
     {
@@ -64,7 +67,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         trackedPlayers.add(new WeakReference<>(player));
     }
 
-    public void addFuelTicks(int ticks)
+    public void addFuelTicks(long ticks)
     {
         //TODO: spider loaders and split accordingly
         long totalWorldTime = world.getTotalWorldTime();
@@ -90,40 +93,81 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         if ((totalWorldTime & 31) != 31) {
             return;
         }
-
-        if (Settings.enableFuel && fuelExpireTime < world.getTotalWorldTime()) {
-            Logger.info("Fuel has expired for weirding gadget at %s", pos);
-
-            disable();
+        if (scheduleNeighbourCheck) {
+            checkNeighbours();
         }
 
-        boolean noTrackedPlayers = true;
+        checkFuel();
 
-        final Iterator<WeakReference<EntityPlayer>> trackedPlayerIterator = trackedPlayers.iterator();
-        while (trackedPlayerIterator.hasNext())
+        boolean trackedPlayersOnline = checkOnlinePlayers();
+
+        boolean ticketNeedsExpiring = checkPlayersLoggedOn(trackedPlayersOnline);
+
+        //At this point, no players have been found,
+        //If there isn't an expiry time, it's time to set one.
+        if (ticketNeedsExpiring && expireTime == -1)
         {
-            //If we're tracking the ticket owner, check to see if they're still online
-            final WeakReference<EntityPlayer> playerWeakReference = trackedPlayerIterator.next();
-            EntityPlayer player = playerWeakReference.get();
+            final int timeout = Settings.hoursBeforeDeactivation * WeirdingGadgetMod.MULTIPLIER;
+            //final int timeout = 10 * 20;
+            expireTime = totalWorldTime + timeout;
+            Logger.info("All players have gone offline. Ticket is scheduled to expire at world time %d", expireTime);
+        }
 
-            if (player != null)
-            {
-                player = TicketUtils.getOnlinePlayerByName(world.getMinecraftServer(), player.getName());
+        //If the expire time has expired and we've reached this far
+        //It's time to kill the ticket.
+        if (expireTime != -1 && totalWorldTime >= expireTime) {
+            Logger.info("Ticket for Weirding Gadget at %s has expired.", pos);
+            disable();
+        }
+    }
 
-                //If we couldn't find them, clear the reference, we're not tracking them any more.
-                if (player == null)
-                {
-                    playerWeakReference.clear();
-                    trackedPlayerIterator.remove();
-                } else
-                {
-                    noTrackedPlayers = false;
-                }
+    private void checkNeighbours()
+    {
+        final List<WeirdingGadgetTileEntity> nearbyGadgets = GadgetSpider.findNearbyWeirdingGadgets(world, pos);
+
+        final List<BlockPos> gadgetsToRemove = Lists.newArrayList();
+
+        for (final BlockPos nearbyGadget : this.nearbyGadgets)
+        {
+            if (nearbyGadgets.stream().noneMatch(te -> te.pos.equals(nearbyGadget))) {
+                gadgetsToRemove.add(nearbyGadget);
             }
         }
 
-        boolean ticketNeedsExpiring = noTrackedPlayers;
-        if (noTrackedPlayers) {
+        boolean isDirty = false;
+        for (final WeirdingGadgetTileEntity nearbyGadget : nearbyGadgets)
+        {
+            nearbyGadget.notifyNeighbourAdded(pos);
+            if (!this.nearbyGadgets.contains(nearbyGadget.pos))
+            {
+                this.nearbyGadgets.add(nearbyGadget.pos);
+                isDirty = true;
+            }
+        }
+
+        if (!gadgetsToRemove.isEmpty()) {
+            isDirty = true;
+            this.nearbyGadgets.removeAll(gadgetsToRemove);
+        }
+
+        if (isDirty)
+        {
+            markDirty();
+        }
+    }
+
+    private void notifyNeighbourAdded(BlockPos pos)
+    {
+        if (!nearbyGadgets.contains(pos)) {
+            nearbyGadgets.add(pos);
+            markDirty();
+        }
+    }
+
+    private boolean checkPlayersLoggedOn(boolean trackedPlayersOnline)
+    {
+        boolean ticketNeedsExpiring = trackedPlayersOnline;
+        if (!trackedPlayersOnline) {
             for (final Ticket ticket : tickets)
             {
                 //If we're no longer tracking the ticket owner, but there is a ticket,
@@ -145,23 +189,46 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
                 }
             }
         }
+        return ticketNeedsExpiring;
+    }
 
-        //At this point, the player has not been found,
-        //If there isn't an expiry time, it's time to set one.
-        if (ticketNeedsExpiring && expireTime == -1)
-        {
-            final int timeout = Settings.hoursBeforeDeactivation * WeirdingGadgetMod.MULTIPLIER;
-            //final int timeout = 10 * 20;
-            expireTime = totalWorldTime + timeout;
-            Logger.info("All players have gone offline. Ticket is scheduled to expire at world time %d", expireTime);
-        }
+    private void checkFuel()
+    {
+        if (Settings.enableFuel && fuelExpireTime < world.getTotalWorldTime()) {
+            Logger.info("Fuel has expired for weirding gadget at %s", pos);
 
-        //If the expire time has expired and we've reached this far
-        //It's time to kill the ticket.
-        if (expireTime != -1 && totalWorldTime >= expireTime) {
-            Logger.info("Ticket for Weirding Gadget at %s has expired.", pos);
             disable();
         }
+    }
+
+    private boolean checkOnlinePlayers()
+    {
+        boolean trackedPlayersOnline = false;
+
+        final Iterator<WeakReference<EntityPlayer>> trackedPlayerIterator = trackedPlayers.iterator();
+        while (trackedPlayerIterator.hasNext())
+        {
+            //If we're tracking the ticket owner, check to see if they're still online
+            final WeakReference<EntityPlayer> playerWeakReference = trackedPlayerIterator.next();
+            EntityPlayer player = playerWeakReference.get();
+
+            if (player != null)
+            {
+                player = TicketUtils.getOnlinePlayerByName(world.getMinecraftServer(), player.getName());
+
+                //If we couldn't find them, clear the reference, we're not tracking them any more.
+                if (player == null)
+                {
+                    playerWeakReference.clear();
+                    trackedPlayerIterator.remove();
+                } else
+                {
+                    trackedPlayersOnline = true;
+                }
+            }
+        }
+
+        return trackedPlayersOnline;
     }
 
     private void disable() {
@@ -181,6 +248,15 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         super.readFromNBT(compound);
         expireTime = compound.hasKey("expireTime") ? compound.getLong("expireTime") : -1;
         fuelExpireTime = compound.hasKey("fuelExpireTime") ? compound.getLong("fuelExpireTime") : -1;
+        nearbyGadgets = Lists.newArrayList();
+        if (compound.hasKey("knownNeighbours")) {
+            final NBTTagList tagList = compound.getTagList("knownNeighbours", 10);
+            for (int i = 0; i < tagList.tagCount(); i++)
+            {
+                nearbyGadgets.add(NBTUtil.getPosFromTag(tagList.getCompoundTagAt(i)));
+            }
+        }
+        scheduleNeighbourCheck = true;
     }
 
     @Override
@@ -189,6 +265,12 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         super.writeToNBT(compound);
         compound.setLong("expireTime", expireTime);
         compound.setLong("fuelExpireTime", fuelExpireTime);
+        NBTTagList tagList = new NBTTagList();
+        for (final BlockPos nearbyGadget : nearbyGadgets)
+        {
+            tagList.appendTag(NBTUtil.createPosTag(nearbyGadget));
+        }
+        compound.setTag("knownNeighbours", tagList);
         return compound;
     }
 
@@ -260,5 +342,20 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         long ticksRemaining = fuelExpireTime - totalWorldTime;
         if (ticksRemaining < 0) ticksRemaining = 0;
         return ticksRemaining;
+    }
+
+    public int getLoaderRadius()
+    {
+        int size = 0;
+        for (final Ticket ticket : tickets)
+        {
+            size = Math.max(size, ticket.getModData().getInteger("size"));
+        }
+        return size;
+    }
+
+    public List<BlockPos> getNearbyGadgets()
+    {
+        return nearbyGadgets;
     }
 }
