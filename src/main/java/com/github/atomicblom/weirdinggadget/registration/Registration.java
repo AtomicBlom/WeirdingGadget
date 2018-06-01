@@ -1,8 +1,8 @@
 package com.github.atomicblom.weirdinggadget.registration;
 
 import com.github.atomicblom.weirdinggadget.Reference;
-import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
 import com.github.atomicblom.weirdinggadget.block.WeirdingGadgetBlock;
+import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
 import com.github.atomicblom.weirdinggadget.item.ItemWeirdingGadget;
 import com.github.atomicblom.weirdinggadget.library.BlockLibrary;
 import net.minecraft.block.Block;
@@ -27,7 +27,7 @@ public class Registration
     public static void registerBlocks(Register<Block> event) {
         final IForgeRegistry<Block> registry = event.getRegistry();
         registry.register(configure(new WeirdingGadgetBlock(), Reference.Block.weirding_gadget));
-        GameRegistry.registerTileEntity(WeirdingGadgetTileEntity.class, "tile." + Reference.Block.weirding_gadget);
+        GameRegistry.registerTileEntity(WeirdingGadgetTileEntity.class, Reference.Block.weirding_gadget);
     }
 
     @SubscribeEvent
