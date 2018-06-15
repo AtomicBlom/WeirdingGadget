@@ -1,6 +1,7 @@
 package com.github.atomicblom.weirdinggadget.block.tileentity;
 
 import com.github.atomicblom.weirdinggadget.*;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
@@ -34,7 +35,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
     private boolean isActive;
     private long fuelExpireTime = -1;
     private boolean scheduleNeighbourCheck = true;
-    private List<BlockPos> nearbyGadgets;
+    private List<BlockPos> nearbyGadgets = Lists.newArrayList();
 
     public void setTicket(@Nonnull Ticket ticket)
     {
@@ -127,7 +128,9 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
 
         final List<BlockPos> gadgetsToRemove = Lists.newArrayList();
 
-        for (final BlockPos nearbyGadget : this.nearbyGadgets)
+        List<BlockPos> nearbyGadgetLocations = Lists.newArrayList(this.nearbyGadgets);
+
+        for (final BlockPos nearbyGadget : nearbyGadgetLocations)
         {
             if (nearbyGadgets.stream().noneMatch(te -> te.pos.equals(nearbyGadget))) {
                 gadgetsToRemove.add(nearbyGadget);
@@ -138,29 +141,32 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         for (final WeirdingGadgetTileEntity nearbyGadget : nearbyGadgets)
         {
             nearbyGadget.notifyNeighbourAdded(pos);
-            if (!this.nearbyGadgets.contains(nearbyGadget.pos))
+            if (!nearbyGadgetLocations.contains(nearbyGadget.pos))
             {
-                this.nearbyGadgets.add(nearbyGadget.pos);
+                nearbyGadgetLocations.add(nearbyGadget.pos);
                 isDirty = true;
             }
         }
 
         if (!gadgetsToRemove.isEmpty()) {
             isDirty = true;
-            this.nearbyGadgets.removeAll(gadgetsToRemove);
+            nearbyGadgetLocations.removeAll(gadgetsToRemove);
         }
 
         if (isDirty)
         {
             markDirty();
+            this.nearbyGadgets = nearbyGadgetLocations;
         }
     }
 
     private void notifyNeighbourAdded(BlockPos pos)
     {
+        List<BlockPos> nearbyGadgets = Lists.newArrayList(this.nearbyGadgets);
         if (!nearbyGadgets.contains(pos)) {
             nearbyGadgets.add(pos);
             markDirty();
+            this.nearbyGadgets = nearbyGadgets;
         }
     }
 
@@ -248,7 +254,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         super.readFromNBT(compound);
         expireTime = compound.hasKey("expireTime") ? compound.getLong("expireTime") : -1;
         fuelExpireTime = compound.hasKey("fuelExpireTime") ? compound.getLong("fuelExpireTime") : -1;
-        nearbyGadgets = Lists.newArrayList();
+        List<BlockPos> nearbyGadgets = Lists.newArrayList();
         if (compound.hasKey("knownNeighbours")) {
             final NBTTagList tagList = compound.getTagList("knownNeighbours", 10);
             for (int i = 0; i < tagList.tagCount(); i++)
@@ -256,6 +262,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
                 nearbyGadgets.add(NBTUtil.getPosFromTag(tagList.getCompoundTagAt(i)));
             }
         }
+        this.nearbyGadgets = nearbyGadgets;
         scheduleNeighbourCheck = true;
     }
 
@@ -265,12 +272,15 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         super.writeToNBT(compound);
         compound.setLong("expireTime", expireTime);
         compound.setLong("fuelExpireTime", fuelExpireTime);
-        NBTTagList tagList = new NBTTagList();
-        for (final BlockPos nearbyGadget : nearbyGadgets)
-        {
-            tagList.appendTag(NBTUtil.createPosTag(nearbyGadget));
+        List<BlockPos> gadgetsToSave = this.getNearbyGadgets();
+        if (gadgetsToSave != null && !gadgetsToSave.isEmpty()) {
+            NBTTagList tagList = new NBTTagList();
+            for (final BlockPos nearbyGadget : gadgetsToSave) {
+                tagList.appendTag(NBTUtil.createPosTag(nearbyGadget));
+            }
+
+            compound.setTag("knownNeighbours", tagList);
         }
-        compound.setTag("knownNeighbours", tagList);
         return compound;
     }
 
@@ -356,6 +366,13 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
 
     public List<BlockPos> getNearbyGadgets()
     {
-        return nearbyGadgets;
+        return ImmutableList.copyOf(nearbyGadgets);
+    }
+
+    public void removeNearbyGadget(BlockPos blockPos) {
+
+        List<BlockPos> newList = Lists.newArrayList(nearbyGadgets);
+        newList.remove(blockPos);
+        nearbyGadgets = newList;
     }
 }

@@ -82,7 +82,6 @@ public class GadgetSpider
 					{
 						chunksToVisit.push(world.getChunkFromChunkCoords(chunk.x + x, chunk.z + z));
 					}
-
 				}
 			}
 		}
@@ -115,6 +114,8 @@ public class GadgetSpider
 				final TileEntity tileEntity = world.getTileEntity(blockPos);
 				if (tileEntity instanceof WeirdingGadgetTileEntity) {
 					gadgetsToSearch.push((WeirdingGadgetTileEntity)tileEntity);
+				} else {
+					gadget.removeNearbyGadget(blockPos);
 				}
 			}
 		}
