@@ -71,7 +71,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
     public void addFuelTicks(long ticks)
     {
         //TODO: spider loaders and split accordingly
-        long totalWorldTime = world.getTotalWorldTime();
+        final long totalWorldTime = world.getTotalWorldTime();
         if (fuelExpireTime < totalWorldTime) {
             fuelExpireTime = totalWorldTime + ticks;
         } else {
@@ -100,13 +100,13 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
 
         checkFuel();
 
-        boolean trackedPlayersOnline = checkOnlinePlayers();
+        final boolean trackedPlayersOnline = checkOnlinePlayers();
 
-        boolean ticketNeedsExpiring = checkPlayersLoggedOn(trackedPlayersOnline);
+        final boolean gadgetIsValid = checkPlayersLoggedOn(trackedPlayersOnline);
 
         //At this point, no players have been found,
         //If there isn't an expiry time, it's time to set one.
-        if (ticketNeedsExpiring && expireTime == -1)
+        if (!gadgetIsValid && expireTime == -1)
         {
             final int timeout = Settings.hoursBeforeDeactivation * WeirdingGadgetMod.MULTIPLIER;
             //final int timeout = 10 * 20;
@@ -128,7 +128,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
 
         final List<BlockPos> gadgetsToRemove = Lists.newArrayList();
 
-        List<BlockPos> nearbyGadgetLocations = Lists.newArrayList(this.nearbyGadgets);
+        final List<BlockPos> nearbyGadgetLocations = Lists.newArrayList(this.nearbyGadgets);
 
         for (final BlockPos nearbyGadget : nearbyGadgetLocations)
         {
@@ -162,7 +162,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
 
     private void notifyNeighbourAdded(BlockPos pos)
     {
-        List<BlockPos> nearbyGadgets = Lists.newArrayList(this.nearbyGadgets);
+        final List<BlockPos> nearbyGadgets = Lists.newArrayList(this.nearbyGadgets);
         if (!nearbyGadgets.contains(pos)) {
             nearbyGadgets.add(pos);
             markDirty();
@@ -172,30 +172,38 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
 
     private boolean checkPlayersLoggedOn(boolean trackedPlayersOnline)
     {
-        boolean ticketNeedsExpiring = trackedPlayersOnline;
-        if (!trackedPlayersOnline) {
-            for (final Ticket ticket : tickets)
-            {
-                //If we're no longer tracking the ticket owner, but there is a ticket,
-                //Check to see if the player has come online.
+        if (trackedPlayersOnline)
+        {
+            return true;
+        }
 
-                final EntityPlayer playerEntityByName = TicketUtils.getOnlinePlayerByName(world.getMinecraftServer(), ticket.getPlayerName());
-                //If they're found
-                if (playerEntityByName != null)
+        boolean gadgetIsValid = false;
+
+        for (final Ticket ticket : tickets)
+        {
+            //If we're no longer tracking the ticket owner, but there is a ticket,
+            //Check to see if the player has come online.
+
+            final EntityPlayer playerEntityByName = TicketUtils.getOnlinePlayerByName(world.getMinecraftServer(), ticket.getPlayerName());
+            //If they're found
+            if (playerEntityByName != null)
+            {
+                //reset the expiry
+                expireTime = -1;
+                //start tracking the player
+                trackedPlayers.add(new WeakReference<>(playerEntityByName));
+                if (!world.isRemote)
                 {
-                    //reset the expiry
-                    expireTime = -1;
-                    //start tracking the player
-                    trackedPlayers.add(new WeakReference<>(playerEntityByName));
                     Logger.info("Chunk Loader at %s is revived because %s returned", pos, playerEntityByName.getName());
-                    //Start the animation again
-                    world.addBlockEvent(pos, getBlockType(), ACTIVE_STATE_CHANGED, 1);
-                    //Block any further processing
-                    ticketNeedsExpiring = false;
                 }
+                //Start the animation again
+                world.addBlockEvent(pos, getBlockType(), ACTIVE_STATE_CHANGED, 1);
+                //Block any further processing
+                gadgetIsValid = true;
             }
         }
-        return ticketNeedsExpiring;
+        return gadgetIsValid;
+
     }
 
     private void checkFuel()
@@ -254,7 +262,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         super.readFromNBT(compound);
         expireTime = compound.hasKey("expireTime") ? compound.getLong("expireTime") : -1;
         fuelExpireTime = compound.hasKey("fuelExpireTime") ? compound.getLong("fuelExpireTime") : -1;
-        List<BlockPos> nearbyGadgets = Lists.newArrayList();
+        final List<BlockPos> nearbyGadgets = Lists.newArrayList();
         if (compound.hasKey("knownNeighbours")) {
             final NBTTagList tagList = compound.getTagList("knownNeighbours", 10);
             for (int i = 0; i < tagList.tagCount(); i++)
@@ -272,9 +280,9 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
         super.writeToNBT(compound);
         compound.setLong("expireTime", expireTime);
         compound.setLong("fuelExpireTime", fuelExpireTime);
-        List<BlockPos> gadgetsToSave = this.getNearbyGadgets();
+        final List<BlockPos> gadgetsToSave = this.getNearbyGadgets();
         if (gadgetsToSave != null && !gadgetsToSave.isEmpty()) {
-            NBTTagList tagList = new NBTTagList();
+            final NBTTagList tagList = new NBTTagList();
             for (final BlockPos nearbyGadget : gadgetsToSave) {
                 tagList.appendTag(NBTUtil.createPosTag(nearbyGadget));
             }
@@ -348,7 +356,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
 
     public long getFuelTicks()
     {
-        long totalWorldTime = world.getTotalWorldTime();
+        final long totalWorldTime = world.getTotalWorldTime();
         long ticksRemaining = fuelExpireTime - totalWorldTime;
         if (ticksRemaining < 0) ticksRemaining = 0;
         return ticksRemaining;
@@ -371,7 +379,7 @@ public class WeirdingGadgetTileEntity extends TileEntity implements ITickable
 
     public void removeNearbyGadget(BlockPos blockPos) {
 
-        List<BlockPos> newList = Lists.newArrayList(nearbyGadgets);
+        final List<BlockPos> newList = Lists.newArrayList(nearbyGadgets);
         newList.remove(blockPos);
         nearbyGadgets = newList;
     }
