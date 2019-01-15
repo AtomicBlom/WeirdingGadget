@@ -28,6 +28,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -116,6 +117,7 @@ public class WeirdingGadgetBlock extends Block
         final Ticket ticket = ForgeChunkManager.requestPlayerTicket(WeirdingGadgetMod.INSTANCE, placer.getName(), worldIn, Type.NORMAL);
 
         if (ticket == null) {
+            placer.sendStatusMessage(new TextComponentString("Could not request any more chunk loading tickets"), true);
             //Player has requested too many tickets. Forge will log an issue here.
             return;
         }
