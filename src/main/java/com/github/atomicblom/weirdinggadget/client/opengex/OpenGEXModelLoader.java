@@ -36,8 +36,8 @@ public enum OpenGEXModelLoader implements ICustomModelLoader {
     }
 
     public boolean accepts(ResourceLocation modelLocation) {
-        return enabledDomains.contains(modelLocation.getResourceDomain().toLowerCase()) &&
-                modelLocation.getResourcePath().toLowerCase().endsWith(".ogex");
+        return enabledDomains.contains(modelLocation.getNamespace().toLowerCase()) &&
+                modelLocation.getPath().toLowerCase().endsWith(".ogex");
     }
 
     public void onResourceManagerReload(IResourceManager manager)
@@ -48,7 +48,7 @@ public enum OpenGEXModelLoader implements ICustomModelLoader {
 
     @Override
     public IModel loadModel(ResourceLocation modelLocation) throws IOException {
-        ResourceLocation file = new ResourceLocation(modelLocation.getResourceDomain(), modelLocation.getResourcePath());
+        ResourceLocation file = new ResourceLocation(modelLocation.getNamespace(), modelLocation.getPath());
         if(!cache.containsKey(file))
         {
             try
@@ -60,10 +60,10 @@ public enum OpenGEXModelLoader implements ICustomModelLoader {
                 }
                 catch(FileNotFoundException e)
                 {
-                    if(modelLocation.getResourcePath().startsWith("models/block/"))
-                        resource = manager.getResource(new ResourceLocation(file.getResourceDomain(), "models/item/" + file.getResourcePath().substring("models/block/".length())));
-                    else if(modelLocation.getResourcePath().startsWith("models/item/"))
-                        resource = manager.getResource(new ResourceLocation(file.getResourceDomain(), "models/block/" + file.getResourcePath().substring("models/item/".length())));
+                    if(modelLocation.getPath().startsWith("models/block/"))
+                        resource = manager.getResource(new ResourceLocation(file.getNamespace(), "models/item/" + file.getPath().substring("models/block/".length())));
+                    else if(modelLocation.getPath().startsWith("models/item/"))
+                        resource = manager.getResource(new ResourceLocation(file.getNamespace(), "models/block/" + file.getPath().substring("models/item/".length())));
                     else throw e;
                 }
 

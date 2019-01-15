@@ -51,7 +51,7 @@ public class Registration
 
     static <B extends Block> B configure(B block, ResourceLocation registryName) {
         block.setRegistryName(registryName)
-                .setUnlocalizedName(registryName.toString())
+                .setTranslationKey(registryName.toString())
                 .setCreativeTab(CreativeTabs.MISC);
 
         return block;
@@ -61,7 +61,7 @@ public class Registration
 
         ItemBlock itemBlock = new ItemBlock(block);
         itemBlock.setRegistryName(block.getRegistryName())
-                .setUnlocalizedName(block.getUnlocalizedName())
+                .setTranslationKey(block.getTranslationKey())
                 .setCreativeTab(CreativeTabs.MISC);
 
         return itemBlock;

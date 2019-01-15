@@ -133,7 +133,7 @@ public class OpenGEXModel implements IModel
 
     @Override
     public Collection<ResourceLocation> getTextures() {
-        return Collections2.filter(getTextureMap().values(), loc -> !loc.getResourcePath().startsWith("#"));
+        return Collections2.filter(getTextureMap().values(), loc -> !loc.getPath().startsWith("#"));
     }
 
     @Override
@@ -144,9 +144,9 @@ public class OpenGEXModel implements IModel
 
         for (Entry<String, ResourceLocation> e : getTextureMap().entrySet()) {
             final String key = e.getKey();
-            if(e.getValue().getResourcePath().startsWith("#"))
+            if(e.getValue().getPath().startsWith("#"))
             {
-                FMLLog.severe("unresolved texture '%s' for OGEX model '%s'", e.getValue().getResourcePath(), location);
+                FMLLog.severe("unresolved texture '%s' for OGEX model '%s'", e.getValue().getPath(), location);
                 builder.put(key, missing);
             }
             else
