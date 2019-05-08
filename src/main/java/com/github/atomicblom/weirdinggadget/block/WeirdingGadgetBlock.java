@@ -1,5 +1,6 @@
 package com.github.atomicblom.weirdinggadget.block;
 
+import com.github.atomicblom.weirdinggadget.Logger;
 import com.github.atomicblom.weirdinggadget.TicketUtils;
 import com.github.atomicblom.weirdinggadget.Settings;
 import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
@@ -89,6 +90,26 @@ public class WeirdingGadgetBlock extends Block
 
     private static void activateChunkLoader(World worldIn, BlockPos pos, EntityPlayer placer)
     {
+        if (worldIn == null) {
+            Logger.severe("While attempting to active a Weirding Gadget, Somehow, the world was null?");
+            return;
+        }
+
+        if (placer == null) {
+            Logger.severe("While attempting to active a Weirding Gadget, Somehow, the player was null?");
+            return;
+        }
+
+        if (placer.getName() == null) {
+            Logger.severe("While attempting to active a Weirding Gadget, Somehow, the player's NAME was null?");
+            return;
+        }
+
+        if (WeirdingGadgetMod.INSTANCE == null) {
+            Logger.severe("While attempting to active a Weirding Gadget, Somehow, MOD INSTANCE was null!?");
+            return;
+        }
+
         final Ticket ticket = ForgeChunkManager.requestPlayerTicket(WeirdingGadgetMod.INSTANCE, placer.getName(), worldIn, Type.NORMAL);
 
         if (ticket == null) {
