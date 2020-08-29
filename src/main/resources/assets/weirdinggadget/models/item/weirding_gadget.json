@@ -1,0 +1,9 @@
+{
+	"parent": "minecraft:block/block",
+	"loader": "weirdinggadget:force_ister",
+	"display": {
+		"head": {
+			"translation": [ 0, 1, 0]
+		}
+	}
+}

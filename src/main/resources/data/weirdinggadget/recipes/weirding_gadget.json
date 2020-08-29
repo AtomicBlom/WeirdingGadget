@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "result": {
+    "item": "weirdinggadget:weirding_gadget",
+    "count": 1
+  },
+  "pattern": [
+    "ggg",
+    "GeG",
+    "GiG"
+  ],
+  "key": {
+    "G": {
+      "tag": "forge:storage_blocks/gold"
+    },
+    "g": {
+      "tag": "forge:ingots/gold"
+    },
+    "e": {
+      "item": "minecraft:ender_eye"
+    },
+    "i": {
+      "tag": "forge:ingots/iron"
+    }
+  }
+}

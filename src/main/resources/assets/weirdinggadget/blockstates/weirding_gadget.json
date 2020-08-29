@@ -1,69 +1,31 @@
 {
-  "forge_marker": 1,
-  "defaults": {
-    "transform": "forge:default-block",
-    "model": "weirdinggadget:ss_chunk_loader.ogex",
-    "textures": {
-      "#sschunkl": "weirdinggadget:models/sschunkl",
-      "#particle": "weirdinggadget:models/sschunkl_particle"
-    }
-  },
-  "variants": {
-    "normal": [{
-    }],
-    "inventory": [{
-      "transform": {
-        "gui": {
-          "translation": [ 0, 0, 0 ],
-          "rotation": [{"x": 30}, {"y": 225}],
-          "scale": 0.625
-        },
-        "ground": {
-          "scale": 0.25
-        },
-        "fixed": {
-          "scale": 0.5
-        },
-        "head": {
-          "translation": [0, 0.53, 0]
-        },
-        "thirdperson_lefthand": {
-          "rotation": [{"x": 75}, {"y": 30}],
-          "translation": [ -0.05, 0.15, 0.1],
-          "scale": 0.375
-        },
-        "thirdperson_righthand": {
-          "rotation": [{"x": 75}, {"y": 30}],
-          "translation": [ -0.05, 0.15, 0.1],
-          "scale": 0.375
-        },
-        "firstperson": {
-          "rotation": {"y": 45 },
-          "translation": [ 0, 0.2, 0],
-          "scale": 0.4
-        },
-        "firstperson_lefthand": {
-          "rotation": {"y": 45 },
-          "translation": [ 0, 0.2, 0],
-          "scale": 0.4
-        }
-      }
-    }],
-    "render_dynamic": {
-      "false": {
-        "custom": {
-          "enabled-nodes": [
-            "clbody"
-          ]
-        }
+  "multipart": [
+    {
+      "when": {
+        "active": "false"
       },
-      "true": {
-        "custom": {
-          "enabled-nodes": [
-            "clspinner"
-          ]
-        }
-      }
+      "apply": [
+        {"model": "weirdinggadget:block/sschunkloader"},
+        {"model": "weirdinggadget:block/sschunkloader_spinner"}
+      ]
+    },
+    {
+      "when": {
+          "active": "true",
+          "render": "static"
+      },
+      "apply": [
+        {"model": "weirdinggadget:block/sschunkloader"}
+      ]
+    },
+    {
+      "when": {
+        "active": "true",
+        "render": "dynamic"
+      },
+      "apply": [
+        {"model": "weirdinggadget:block/sschunkloader_spinner"}
+      ]
     }
-  }
+  ]
 }

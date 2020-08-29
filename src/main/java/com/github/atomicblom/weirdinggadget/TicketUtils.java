@@ -1,42 +1,47 @@
 package com.github.atomicblom.weirdinggadget;
 
 import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
+import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetChunkManager;
+import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetTicket;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeChunkManager;
-import net.minecraftforge.common.ForgeChunkManager.Ticket;
 
 /**
  * Created by codew on 17/01/2017.
  */
 public class TicketUtils {
 
-    public static boolean isTicketValid(IBlockAccess blockAccess, Ticket ticket) {
-        NBTTagCompound modData = ticket.getModData();
-        if (!modData.hasKey("blockPosition")) {
+    public static boolean isTicketValid(IWorldReader blockAccess, WeirdingGadgetTicket ticket) {
+        CompoundNBT modData = ticket.getModData();
+        if (!modData.contains("blockPosition")) {
             return false;
         }
-        BlockPos pos = NBTUtil.getPosFromTag(modData.getCompoundTag("blockPosition"));
+        BlockPos pos = NBTUtil.readBlockPos(modData.getCompound("blockPosition"));
         TileEntity te = blockAccess.getTileEntity(pos);
         return te instanceof WeirdingGadgetTileEntity;
     }
 
-    public static void activateTicket(World world, Ticket ticket) {
+    public static void activateTicket(World world, WeirdingGadgetTicket ticket) {
         if (!isTicketValid(world, ticket)) return;
 
-        NBTTagCompound modData = ticket.getModData();
-        BlockPos pos = NBTUtil.getPosFromTag(modData.getCompoundTag("blockPosition"));
+        CompoundNBT modData = ticket.getModData();
+        BlockPos pos = NBTUtil.readBlockPos(modData.getCompound("blockPosition"));
         TileEntity te = world.getTileEntity(pos);
+        if (!(te instanceof WeirdingGadgetTileEntity)) {
+            WeirdingGadgetMod.LOGGER.error("Expected a Weirding Gadget Tile Entity at {}, but it was a {}", pos, te);
+            return;
+        }
+
         WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)te;
-        int size = modData.getInteger("size");
+        int size = modData.getInt("size");
 
         final ChunkPos chunk = new ChunkPos(pos);
 
@@ -49,31 +54,31 @@ public class TicketUtils {
             for (int x = minX; x <= maxX; ++x) {
                 final ChunkPos ticketChunk = new ChunkPos(x, z);
 
-                ForgeChunkManager.forceChunk(ticket, ticketChunk);
+                WeirdingGadgetChunkManager.forceChunk(world, ticket, ticketChunk);
             }
         }
 
-        tileEntity.setTicket(ticket);
+        tileEntity.addTicket(ticket);
 
         String playerName = ticket.getPlayerName();
 
-        final EntityPlayerMP player = getOnlinePlayerByName(world.getMinecraftServer(), playerName);
+        final ServerPlayerEntity player = getOnlinePlayerByName(world.getServer(), playerName);
         if (player != null)
         {
             tileEntity.addTrackedPlayer(player);
         }
     }
 
-    public static EntityPlayerMP getOnlinePlayerByName(MinecraftServer server, String playerName) {
-        EntityPlayerMP locatedPlayer = null;
-        if (server == null || server.getPlayerList() == null || playerName == null) {
+    public static ServerPlayerEntity getOnlinePlayerByName(MinecraftServer server, String playerName) {
+        ServerPlayerEntity locatedPlayer = null;
+        if (server == null || playerName == null) {
             return null;
         }
         final PlayerList playerList = server.getPlayerList();
 
-        for (final EntityPlayerMP entityPlayerMP : playerList.getPlayers())
+        for (final ServerPlayerEntity entityPlayerMP : playerList.getPlayers())
         {
-            if (playerName.equals(entityPlayerMP.getName())) {
+            if (playerName.equals(entityPlayerMP.getName().getString())) {
                 locatedPlayer = entityPlayerMP;
                 break;
             }

@@ -1,0 +1,23 @@
+{
+	"texture_size": [32, 32],
+	"textures": {
+		"chunkloader": "weirdinggadget:models/sschunkl",
+		"particle": "weirdinggadget:models/sschunkl_particle"
+	},
+	"elements": [
+		{
+			"name": "base",
+			"from": [3, 0, 3],
+			"to": [13, 7, 13],
+			"rotation": {"angle": 0, "axis": "y", "origin": [11, 8, 11]},
+			"faces": {
+				"north": {"uv": [0, 12.5, 5.5, 16], "texture": "#chunkloader"},
+				"east": {"uv": [0, 12.5, 5.5, 16], "texture": "#chunkloader"},
+				"south": {"uv": [0, 12.5, 5.5, 16], "texture": "#chunkloader"},
+				"west": {"uv": [0, 12.5, 5.5, 16], "texture": "#chunkloader"},
+				"up": {"uv": [0, 6.5, 5.5, 12], "texture": "#chunkloader"},
+				"down": {"uv": [0, 6.5, 5.5, 12], "texture": "#chunkloader", "cullface": "down"}
+			}
+		}
+	]
+}

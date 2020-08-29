@@ -1,207 +1,180 @@
 package com.github.atomicblom.weirdinggadget.block;
 
-import com.github.atomicblom.weirdinggadget.Logger;
-import com.github.atomicblom.weirdinggadget.TicketUtils;
 import com.github.atomicblom.weirdinggadget.Settings;
+import com.github.atomicblom.weirdinggadget.TicketUtils;
 import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
 import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
-import com.github.atomicblom.weirdinggadget.client.opengex.OpenGEXAnimationFrameProperty;
+import com.github.atomicblom.weirdinggadget.chunkloading.Type;
+import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetChunkManager;
+import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetTicket;
+import com.github.atomicblom.weirdinggadget.library.TileEntityTypeLibrary;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.MapColor;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyBool;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
+import net.minecraft.state.BooleanProperty;
+import net.minecraft.state.EnumProperty;
+import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeChunkManager;
-import net.minecraftforge.common.ForgeChunkManager.Ticket;
-import net.minecraftforge.common.ForgeChunkManager.Type;
-import net.minecraftforge.common.property.ExtendedBlockState;
-import net.minecraftforge.common.property.IUnlistedProperty;
+
 import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class WeirdingGadgetBlock extends Block
 {
-    public static final PropertyBool RENDER_DYNAMIC = PropertyBool.create("render_dynamic");
+    public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
+    public static final EnumProperty<RenderType> RENDER = EnumProperty.create("render", RenderType.class);
 
-    public WeirdingGadgetBlock()
+    public WeirdingGadgetBlock(Properties properties)
     {
-        super(Material.ROCK, MapColor.YELLOW);
-        setDefaultState(
-                blockState
-                        .getBaseState()
-                        .withProperty(RENDER_DYNAMIC, false)
-        );
-        setHardness(3.0f);
-        setResistance(5.0f);
-        setSoundType(SoundType.STONE);
+        super(properties);
+        setDefaultState(getDefaultState().with(ACTIVE, false).with(RENDER, RenderType.STATIC));
     }
 
     @Override
-    protected BlockStateContainer createBlockState()
-    {
-        return new ExtendedBlockState(this, new IProperty[]{RENDER_DYNAMIC}, new IUnlistedProperty[]{OpenGEXAnimationFrameProperty.instance});
+    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+        builder.add(ACTIVE, RENDER);
     }
 
     @Override
-    public void addInformation(ItemStack stack, @Nullable World player, List<String> tooltip, ITooltipFlag advanced)
-    {
-        tooltip.add(I18n.format("tile.weirdinggadget:weirding_gadget.tooltip"));
+    public void addInformation(ItemStack stack, @Nullable IBlockReader worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(new TranslationTextComponent("block.weirdinggadget.weirding_gadget.tooltip.title"));
+        tooltip.add(new TranslationTextComponent("block.weirdinggadget.weirding_gadget.tooltip.description")
+                .setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
+        tooltip.add(new TranslationTextComponent("block.weirdinggadget.weirding_gadget.tooltip.hat")
+                .setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
+        tooltip.add(new TranslationTextComponent("block.weirdinggadget.weirding_gadget.tooltip.weird")
+                .setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
     }
 
-    @Override
-    @Deprecated
-    public IBlockState getStateFromMeta(int meta)
-    {
-        return getDefaultState();
-    }
+
 
     @Override
-    public int getMetaFromState(IBlockState state)
-    {
-        return 0;
-    }
-
-    @Override
-    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
-    {
-        if (!(placer instanceof EntityPlayer)) {
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+        if (!(placer instanceof PlayerEntity)) {
             return;
         }
 
-        activateChunkLoader(worldIn, pos, (EntityPlayer)placer);
+        activateChunkLoader(worldIn, pos, (PlayerEntity)placer);
     }
 
-    private static void activateChunkLoader(World worldIn, BlockPos pos, EntityPlayer placer)
+    private static void activateChunkLoader(World worldIn, BlockPos pos, PlayerEntity placer)
     {
+        if (worldIn.isRemote) { return; }
+
         if (worldIn == null) {
-            Logger.severe("While attempting to active a Weirding Gadget, Somehow, the world was null?");
+            WeirdingGadgetMod.LOGGER.error("While attempting to active a Weirding Gadget, Somehow, the world was null?");
             return;
         }
 
         if (placer == null) {
-            Logger.severe("While attempting to active a Weirding Gadget, Somehow, the player was null?");
+            WeirdingGadgetMod.LOGGER.error("While attempting to active a Weirding Gadget, Somehow, the player was null?");
             return;
         }
 
         if (placer.getName() == null) {
-            Logger.severe("While attempting to active a Weirding Gadget, Somehow, the player's NAME was null?");
+            WeirdingGadgetMod.LOGGER.error("While attempting to active a Weirding Gadget, Somehow, the player's NAME was null?");
             return;
         }
 
-        if (WeirdingGadgetMod.INSTANCE == null) {
-            Logger.severe("While attempting to active a Weirding Gadget, Somehow, MOD INSTANCE was null!?");
-            return;
-        }
-
-        final Ticket ticket = ForgeChunkManager.requestPlayerTicket(WeirdingGadgetMod.INSTANCE, placer.getName(), worldIn, Type.NORMAL);
+        final WeirdingGadgetTicket ticket = WeirdingGadgetChunkManager.requestPlayerTicket(WeirdingGadgetMod.instance, placer.getName().getString(), worldIn, Type.NORMAL);
 
         if (ticket == null) {
             //Player has requested too many tickets. Forge will log an issue here.
             return;
         }
 
-
-        final NBTTagCompound modData = ticket.getModData();
-        modData.setTag("blockPosition", NBTUtil.createPosTag(pos));
-        modData.setInteger("size", Settings.chunkLoaderWidth);
+        final CompoundNBT modData = ticket.getModData();
+        modData.put("blockPosition", NBTUtil.writeBlockPos(pos));
+        modData.putInt("size", Settings.SERVER.chunkLoaderWidth.get());
 
         TicketUtils.activateTicket(worldIn, ticket);
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
-    {
-        if (worldIn.isRemote) {return true;}
+    @Deprecated
+    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+        if (worldIn.isRemote) { return ActionResultType.SUCCESS; }
 
         final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)worldIn.getTileEntity(pos);
-        if (tileEntity == null) return false;
+        if (tileEntity == null) return ActionResultType.FAIL;
 
-        if (tileEntity.isExpired() || !tileEntity.hasTicket(playerIn)) {
+        if (tileEntity.isExpired() || !tileEntity.hasTicket(player)) {
 
-            activateChunkLoader(worldIn, pos, playerIn);
+            activateChunkLoader(worldIn, pos, player);
 
-            return true;
+            return ActionResultType.SUCCESS;
         }
 
-        return false;
+        return ActionResultType.FAIL;
     }
 
     @Override
-    public boolean hasTileEntity(IBlockState state)
-    {
+    public boolean hasTileEntity(BlockState state) {
         return true;
     }
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(World world, IBlockState state)
-    {
-        return new WeirdingGadgetTileEntity();
+    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
+        return TileEntityTypeLibrary.weirding_gadget.create();
     }
 
     @Override
-    public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos)
-    {
+    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
         return 5;
     }
 
     @Override
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
-    {
+    @Deprecated
+    public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+        if (newState.getBlock() == this) return;
         final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)worldIn.getTileEntity(pos);
         if (tileEntity == null) return;
 
         tileEntity.expireAllTickets();
 
-        super.breakBlock(worldIn, pos, state);
+        super.onReplaced(state, worldIn, pos, newState, isMoving);
     }
 
     ///////////// Rendering //////////////
 
-    @Override
-    @Deprecated
-    public boolean isOpaqueCube(IBlockState state)
-    {
-        return false;
-    }
+    final VoxelShape AABB = Block.makeCuboidShape(
+            3, 0, 3, 13, 16, 13
+    );
 
     @Override
     @Deprecated
-    public boolean isFullCube(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    @Deprecated
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-        final float onePixel = 1/16.0f;
-
-        return new AxisAlignedBB(3*onePixel, 0, 3*onePixel, 1- 3*onePixel, 1, 1- 3*onePixel);
+    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+        return AABB;
     }
 
     ///////////// Networking /////////////////
 
+
     @Override
     @Deprecated
-    public boolean eventReceived(IBlockState state, World worldIn, BlockPos pos, int id, int param)
-    {
+    public boolean eventReceived(BlockState state, World worldIn, BlockPos pos, int id, int param) {
         final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)worldIn.getTileEntity(pos);
         if (tileEntity == null) return false;
 

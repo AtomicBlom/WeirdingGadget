@@ -1,85 +1,196 @@
-import org.gradle.plugins.ide.idea.model.* 
-
-// define the properties file 
-ext.configFile = file "gradle.properties"
-configFile.withReader { 
-    // read config.  it shall from now on be referenced as simply config or as project.config 
-    def prop = new Properties() 
-    prop.load(it) 
-    project.ext.config = new ConfigSlurper().parse prop 
-}
-
 buildscript {
     repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
         jcenter()
-        maven { url = "http://files.minecraftforge.net/maven" }
+        mavenCentral()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
     }
 }
-apply plugin: 'java' 
-apply plugin: 'idea' 
-apply plugin: 'net.minecraftforge.gradle.forge'
 
-///////////////////////////////////////////////////  
-// IDE Settings 
-/////////////////////////////////////////////////// 
+apply plugin: 'net.minecraftforge.gradle'
+// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 
-/////////////////////////////////////////////////// 
-// ForgeGradle 
-/////////////////////////////////////////////////// 
+import org.apache.tools.ant.filters.ReplaceTokens
+
+// define the properties file
+ext.configFile = file "gradle.properties"
+configFile.withReader {
+    // read config.  it shall from now on be referenced as simply config or as project.config
+    def prop = new Properties()
+    prop.load(it)
+    project.ext.config = new ConfigSlurper().parse prop
+}
+
 def isCIBuild = hasProperty("CIRevision")
 if (isCIBuild) {
     println("Producing a Release build")
 } else {
     println("This build will produce an unsactioned release")
 }
-version = (hasProperty("CIRevision") ? CIRevision : config.mod_version) 
-group = config.group_name 
-archivesBaseName = "${config.mod_id}-${config.minecraft_version}" 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8 // Need this here so eclipse task generates correctly.
-compileJava {
-    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
-}
 
+version = (hasProperty("CIRevision") ? CIRevision : config.mod_version)
+group = config.group_name
+archivesBaseName = "${config.mod_id}-${config.minecraft_version}"
+
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+
+println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    version = config.minecraft_version + "-" + config.forge_version // grab latest forge 
-    runDir = "run"
+    // The mappings can be changed at any time, and must be in the following format.
+    // snapshot_YYYYMMDD   Snapshot are built nightly.
+    // stable_#            Stables are built at the discretion of the MCP team.
+    // Use non-default mappings at your own risk. they may not always work.
+    // Simply re-run your setup task after changing the mappings to update your workspace.
+    mappings channel: 'snapshot', version: config.mcp_mappings
+    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
     
-    mappings = config.mcp_mappings 
-    makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable. 
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
-    replace '@MOD_VERSION@', version 
-    replace '@MOD_ID@', config.mod_id 
-    replace '@CI_BUILD@', hasProperty("CIRevision") ? 'true' : 'false' 
+    // Default run configurations.
+    // These can be tweaked, removed, or duplicated as needed.
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            //property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                weirdinggadget {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            //property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.markers', 'WGChunkManager'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                weirdinggadget {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            //property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+
+            args '--mod', config.mod_id, '--all', '--output', file('src/generated/resources/')
+
+            mods {
+                weirdinggadget {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
 }
 
-processResources {
-    // this will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
+task processSource(type: Sync) {
+    from sourceSets.main.java
+    filter(ReplaceTokens, tokens: [IS_CI_BUILD: isCIBuild.toString()])
+    into "$buildDir/src"
+}
 
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-                
-        // replace version and mcversion
-        expand ([ 
-            'version':project.version, 
-            'mcversion':project.minecraft.version, 
-            'forge_version': config.forge_version, 
-            'mod_version': config.mod_version, 
-            'minecraft_version': config.minecraft_version 
+compileJava {
+    source = processSource.outputs
+}
+
+repositories { //Access to Gigaherz private maven server for community mappings
+    maven { url 'https://dvs1.progwml6.com/files/maven' } // JEI & Tinkers
+    maven { url = 'https://www.dogforce-games.com/maven/' } // 1.16 mappings
+    maven { url = 'https://maven.blamejared.com/' } //IE
+}
+
+dependencies {
+    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
+    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
+    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
+    minecraft 'net.minecraftforge:forge:' + config.minecraft_version + '-' + config.forge_version
+
+    compile fg.deobf("mezz.jei:jei-1.16.1:7.0.0.6")
+    compile fg.deobf("blusunrize.immersiveengineering:ImmersiveEngineering:1.16.1-4.0.0-pre.45")
+
+    // You may put jars on which you depend on in ./libs or you may define them like so..
+    // compile "some.group:artifact:version:classifier"
+    // compile "some.group:artifact:version"
+
+    // Real examples
+    // compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
+    // compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
+
+    // The 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
+    // provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+
+    // These dependencies get remapped to your current MCP mappings
+    // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+
+
+
+    // For more info...
+    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
+    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+
+}
+
+// Example for how to get properties into the manifest for reading by the runtime..
+jar {
+    manifest {
+        attributes([
+            "Specification-Title": config.mod_id,
+            "Specification-Vendor": "atomicblom",
+            "Specification-Version": "1", // We are version 1 of ourselves
+            "Implementation-Title": project.name,
+            "Implementation-Version": "${version}",
+            "Implementation-Vendor" :"atomicblom",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
-        
-    // copy everything else except the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
+}
+
+// Example configuration to allow publishing using the maven-publish task
+// This is the preferred method to reobfuscate your jar file
+jar.finalizedBy('reobfJar') 
+// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
+//publish.dependsOn('reobfJar')
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file:///${project.projectDir}/mcmodsrepo"
+        }
     }
 }
 
-jar { 
-    classifier = 'universal' 
+allprojects {
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xmaxerrs" << "9999"
+        }
+    }
 }
