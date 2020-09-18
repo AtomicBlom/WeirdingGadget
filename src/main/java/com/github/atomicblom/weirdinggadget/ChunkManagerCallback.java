@@ -3,12 +3,10 @@ package com.github.atomicblom.weirdinggadget;
 import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetTicket;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.World;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 

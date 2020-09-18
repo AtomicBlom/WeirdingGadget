@@ -1,10 +1,9 @@
 package com.github.atomicblom.weirdinggadget.registration;
 
 import com.github.atomicblom.weirdinggadget.Reference;
-import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
 import com.github.atomicblom.weirdinggadget.block.WeirdingGadgetBlock;
+import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
 import com.github.atomicblom.weirdinggadget.client.WeirdingGadgetItemRenderer;
-import com.github.atomicblom.weirdinggadget.client.WeirdingGadgetTileEntityRenderer;
 import com.github.atomicblom.weirdinggadget.item.WeirdingGadgetItem;
 import com.github.atomicblom.weirdinggadget.library.BlockLibrary;
 import net.minecraft.block.AbstractBlock;
@@ -12,14 +11,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.world.World;
-import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.common.ToolType;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;

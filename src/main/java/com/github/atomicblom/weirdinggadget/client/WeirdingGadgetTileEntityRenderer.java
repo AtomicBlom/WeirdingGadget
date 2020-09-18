@@ -1,33 +1,23 @@
 package com.github.atomicblom.weirdinggadget.client;
 
-//import com.github.atomicblom.weirdinggadget.block.RenderType;
 import com.github.atomicblom.weirdinggadget.block.WeirdingGadgetBlock;
 import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
 import com.github.atomicblom.weirdinggadget.library.ItemLibrary;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import com.sun.javafx.sg.prism.NodeEffectInput;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.data.EmptyModelData;
-import org.lwjgl.opengl.GL11;
 
 public class WeirdingGadgetTileEntityRenderer extends TileEntityRenderer<WeirdingGadgetTileEntity> {
     private final BlockRendererDispatcher blockRenderer = Minecraft.getInstance().getBlockRendererDispatcher();

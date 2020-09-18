@@ -16,7 +16,10 @@ import net.minecraftforge.client.model.IModelLoader;
 import net.minecraftforge.client.model.PerspectiveMapWrapper;
 import net.minecraftforge.client.model.geometry.IModelGeometry;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.function.Function;
 
 public class ForceISTERModel implements IBakedModel {
