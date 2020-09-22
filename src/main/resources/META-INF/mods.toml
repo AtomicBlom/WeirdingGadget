@@ -12,10 +12,9 @@ license="LGPL3"
     #logoFile="examplemod.png" #optional
     #credits="" #optional
     authors="AtomicBlom, Rorax" #optional
-    description='''
-    No idea what this does, but stuff happens when I'm not here.
-    '''
-[[dependencies.weirdinggadget]] 
+    description='''No idea what this does, but stuff happens when I'm not here.'''
+
+[[dependencies.weirdinggadget]]
     modId="forge" #mandatory
     mandatory=true #mandatory
     versionRange="[33,)" #mandatory

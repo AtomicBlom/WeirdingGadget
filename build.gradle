@@ -103,9 +103,9 @@ repositories { //Access to Gigaherz private maven server for community mappings
 
 dependencies {
     minecraft 'net.minecraftforge:forge:' + project.minecraft_version + '-' + project.forge_version
-
     compile fg.deobf("mezz.jei:jei-1.16.1:" + project.jei_version)
-    if (project.hasProperty('immersiveengineering_version')) {
+
+    if (!isCIBuild && project.hasProperty('immersiveengineering_version')) {
         runtime fg.deobf('blusunrize.immersiveengineering:ImmersiveEngineering:' + project.immersiveengineering_version)
     }
 }

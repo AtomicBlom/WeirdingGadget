@@ -84,9 +84,10 @@ steps:
 
   - task: AzureFileCopy@4
     inputs:
-      SourcePath: '$(build.artifactStagingDirectory)'
+      SourcePath: '$(build.artifactStagingDirectory)\*'
       azureSubscription: 'Artifact Storage'
       Destination: 'AzureBlob'
       storage: 'modartifacts'
       ContainerName: '$(blob_bucket)'
+      blobPrefix: '$(javaprops_minecraft_version)'
     condition: and(succeeded(), eq(variables['CreateArtifacts'], 'True'))
