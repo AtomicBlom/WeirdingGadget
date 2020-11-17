@@ -32,7 +32,7 @@ props.each { prop ->
 
 version = (hasProperty("CIRevision") ? CIRevision : project.mod_version)
 group = project.group_name
-archivesBaseName = "${project.mod_id}-${project.minecraft_version}"
+archivesBaseName = "${project.mod_id}-${project.minecraft_version_on_jar}"
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
