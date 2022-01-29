@@ -5,14 +5,11 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.Direction;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraftforge.common.capabilities.*;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 
@@ -23,31 +20,12 @@ import java.util.Set;
 import java.util.UUID;
 
 public class CapabilityWeirdingGadgetTicketList {
-    @CapabilityInject(TicketListData.class)
-    public final static Capability<TicketListData> TICKET_LIST_DATA;
 
-    static {
-        TICKET_LIST_DATA = null;
-    }
+    public final static Capability<TicketListData> TICKET_LIST_DATA = CapabilityManager.get(new CapabilityToken<>() {});
 
     public CapabilityWeirdingGadgetTicketList() { }
 
-    public static void register() {
-        CapabilityManager.INSTANCE.register(TicketListData.class, new Capability.IStorage<TicketListData>() {
-            public INBT writeNBT(Capability<TicketListData> capability, TicketListData instance, Direction side) {
-                return instance.writeToNBT();
-
-            }
-
-            public void readNBT(Capability<TicketListData> capability, TicketListData instance, Direction side, INBT nbt) {
-                if (nbt instanceof ListNBT) {
-                    instance.readFromNBT((ListNBT)nbt);
-                }
-            }
-        }, TicketListData::new);
-    }
-
-    public static class WeirdingGadgetTicketListProvider implements ICapabilityProvider, INBTSerializable<ListNBT> {
+    public static class WeirdingGadgetTicketListProvider implements ICapabilityProvider, INBTSerializable<ListTag> {
         final TicketListData data = new TicketListData();
         final LazyOptional<TicketListData> opt;
 
@@ -61,12 +39,12 @@ public class CapabilityWeirdingGadgetTicketList {
         }
 
         @Override
-        public ListNBT serializeNBT() {
+        public ListTag serializeNBT() {
             return data.writeToNBT();
         }
 
         @Override
-        public void deserializeNBT(ListNBT nbt) {
+        public void deserializeNBT(ListTag nbt) {
             data.readFromNBT(nbt);
         }
     }
@@ -116,15 +94,15 @@ public class CapabilityWeirdingGadgetTicketList {
             }
         }
 
-        public ListNBT writeToNBT() {
-            ListNBT ticketList = new ListNBT();
+        public ListTag writeToNBT() {
+            ListTag ticketList = new ListTag();
             for (WeirdingGadgetTicket ticket : tickets.values()) {
-                CompoundNBT ticketData = new CompoundNBT();
+                CompoundTag ticketData = new CompoundTag();
                 if (ticket.getPlayerName() != null) {
                     ticketData.putString("playerName", ticket.getPlayerName());
                 }
                 ticketData.putString("modName", ticket.getModName());
-                CompoundNBT modData = ticket.getModData();
+                CompoundTag modData = ticket.getModData();
                 if (modData != null) {
                     ticketData.put("data", modData);
                 }
@@ -134,10 +112,10 @@ public class CapabilityWeirdingGadgetTicketList {
             return ticketList;
         }
 
-        public void readFromNBT(ListNBT nbt) {
-            for (INBT inbt : nbt) {
-                if (!(inbt instanceof CompoundNBT)) continue;
-                CompoundNBT ticketData = (CompoundNBT)inbt;
+        public void readFromNBT(ListTag nbt) {
+            for (Tag inbt : nbt) {
+                if (!(inbt instanceof CompoundTag)) continue;
+                CompoundTag ticketData = (CompoundTag)inbt;
 
                 String playerName = ticketData.getString("playerName");
                 String modName = ticketData.getString("modName");

@@ -3,56 +3,80 @@ package com.github.atomicblom.weirdinggadget.client;
 import com.github.atomicblom.weirdinggadget.block.RenderType;
 import com.github.atomicblom.weirdinggadget.block.WeirdingGadgetBlock;
 import com.github.atomicblom.weirdinggadget.library.BlockLibrary;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.block.BlockState;
+import com.google.common.base.Suppliers;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockModelRenderer;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.IItemRenderProperties;
 import net.minecraftforge.client.model.data.EmptyModelData;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class WeirdingGadgetItemRenderer extends ItemStackTileEntityRenderer {
+public class WeirdingGadgetItemRenderer extends BlockEntityWithoutLevelRenderer {
+
+    public static final Supplier<BlockEntityWithoutLevelRenderer> INSTANCE = Suppliers.memoize(
+            () -> new WeirdingGadgetItemRenderer(
+                    Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels()
+            )
+    );
+    public static final IItemRenderProperties USE_WEIRDING_GADGET_RENDER = new IItemRenderProperties()
+    {
+        @Override
+        public BlockEntityWithoutLevelRenderer getItemStackRenderer()
+        {
+            return INSTANCE.get();
+        }
+    };
+
+    public WeirdingGadgetItemRenderer(BlockEntityRenderDispatcher renderDispatcher, EntityModelSet entityModelSet) {
+        super(renderDispatcher, entityModelSet);
+    }
+
     @Override
-    public void func_239207_a_(ItemStack stack, ItemCameraTransforms.TransformType p_239207_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
-        BlockModelRenderer.enableCache();
-        matrixStack.push();
+    public void renderByItem(ItemStack stack, ItemTransforms.TransformType p_239207_2_, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+        ModelBlockRenderer.enableCaching();
+        matrixStack.pushPose();
         float angle = 0;
-        if (p_239207_2_ == ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND ||
-                p_239207_2_ == ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND ||
-                p_239207_2_ == ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND ||
-                p_239207_2_ == ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND ||
-                p_239207_2_ == ItemCameraTransforms.TransformType.HEAD
+        if (p_239207_2_ == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND ||
+                p_239207_2_ == ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND ||
+                p_239207_2_ == ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND ||
+                p_239207_2_ == ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND ||
+                p_239207_2_ == ItemTransforms.TransformType.HEAD
         ) {
             angle = System.currentTimeMillis() % (360 * 4) / 4.0f;
         }
 
-        BlockRendererDispatcher blockRenderer = Minecraft.getInstance().getBlockRendererDispatcher();
+        BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
 
-        final BlockState baseState = BlockLibrary.weirding_gadget.getDefaultState()
-                .with(WeirdingGadgetBlock.ACTIVE, true)
-                .with(WeirdingGadgetBlock.RENDER, RenderType.STATIC);
+        final BlockState baseState = BlockLibrary.weirding_gadget.defaultBlockState()
+                .setValue(WeirdingGadgetBlock.ACTIVE, true)
+                .setValue(WeirdingGadgetBlock.RENDER, RenderType.STATIC);
 
         final BlockState spinnerState = baseState
-                .with(WeirdingGadgetBlock.RENDER, RenderType.DYNAMIC);
+                .setValue(WeirdingGadgetBlock.RENDER, RenderType.DYNAMIC);
 
-        blockRenderer.renderBlock(baseState, matrixStack, buffer, combinedLight, combinedOverlay, EmptyModelData.INSTANCE);
+        blockRenderer.renderSingleBlock(baseState, matrixStack, buffer, combinedLight, combinedOverlay, EmptyModelData.INSTANCE);
 
         matrixStack.translate(0.5f, 0, 0.5f);
-        matrixStack.rotate(new Quaternion(Vector3f.YP, angle, true));
+        matrixStack.mulPose(new Quaternion(Vector3f.YP, angle, true));
         matrixStack.translate(-0.5f, 0, -0.5f);
 
-        blockRenderer.renderBlock(spinnerState, matrixStack, buffer, combinedLight, combinedOverlay, EmptyModelData.INSTANCE);
-        matrixStack.pop();
+        blockRenderer.renderSingleBlock(spinnerState, matrixStack, buffer, combinedLight, combinedOverlay, EmptyModelData.INSTANCE);
+        matrixStack.popPose();
 
     }
 }

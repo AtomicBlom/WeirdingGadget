@@ -1,6 +1,6 @@
 package com.github.atomicblom.weirdinggadget;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class Reference {
     public static final ResourceLocation ItemLoader = resource("force_ister");

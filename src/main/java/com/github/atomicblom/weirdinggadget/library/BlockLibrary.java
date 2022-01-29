@@ -1,7 +1,7 @@
 package com.github.atomicblom.weirdinggadget.library;
 
 import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ObjectHolder;
 
 @ObjectHolder(WeirdingGadgetMod.MOD_ID)

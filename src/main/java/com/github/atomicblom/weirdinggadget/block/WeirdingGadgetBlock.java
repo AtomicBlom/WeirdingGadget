@@ -8,31 +8,38 @@ import com.github.atomicblom.weirdinggadget.chunkloading.Type;
 import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetChunkManager;
 import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetTicket;
 import com.github.atomicblom.weirdinggadget.library.TileEntityTypeLibrary;
-import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.EnumProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -40,50 +47,54 @@ import java.util.List;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class WeirdingGadgetBlock extends Block
+public class WeirdingGadgetBlock extends BaseEntityBlock
 {
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
     public static final EnumProperty<RenderType> RENDER = EnumProperty.create("render", RenderType.class);
 
-    public WeirdingGadgetBlock(Properties properties)
+    public WeirdingGadgetBlock(BlockBehaviour.Properties properties)
     {
         super(properties);
-        setDefaultState(getDefaultState().with(ACTIVE, false).with(RENDER, RenderType.STATIC));
+        registerDefaultState(this.getStateDefinition().any().setValue(ACTIVE, false).setValue(RENDER, RenderType.STATIC));
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level p_153212_, BlockState p_153213_, BlockEntityType<T> blockEntityType) {
+        return createTickerHelper(blockEntityType, TileEntityTypeLibrary.weirding_gadget, WeirdingGadgetTileEntity::tick);
     }
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(ACTIVE, RENDER);
     }
 
     @Override
-    public void addInformation(ItemStack stack, @Nullable IBlockReader worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(new TranslationTextComponent("block.weirdinggadget.weirding_gadget.tooltip.title"));
-        tooltip.add(new TranslationTextComponent("block.weirdinggadget.weirding_gadget.tooltip.description")
-                .setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
-        tooltip.add(new TranslationTextComponent("block.weirdinggadget.weirding_gadget.tooltip.hat")
-                .setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
-        tooltip.add(new TranslationTextComponent("block.weirdinggadget.weirding_gadget.tooltip.weird")
-                .setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
+    public void appendHoverText(ItemStack stack, @Nullable BlockGetter levelIn, List<Component> tooltip, TooltipFlag flagIn) {
+        tooltip.add(new TranslatableComponent("block.weirdinggadget.weirding_gadget.tooltip.title"));
+        tooltip.add(new TranslatableComponent("block.weirdinggadget.weirding_gadget.tooltip.description")
+                .setStyle(Style.EMPTY.applyFormat(ChatFormatting.GRAY)));
+        tooltip.add(new TranslatableComponent("block.weirdinggadget.weirding_gadget.tooltip.hat")
+                .setStyle(Style.EMPTY.applyFormat(ChatFormatting.GRAY)));
+        tooltip.add(new TranslatableComponent("block.weirdinggadget.weirding_gadget.tooltip.weird")
+                .setStyle(Style.EMPTY.applyFormat(ChatFormatting.GRAY)));
     }
 
-
-
     @Override
-    public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-        if (!(placer instanceof PlayerEntity)) {
+    public void setPlacedBy(Level levelIn, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+        if (!(placer instanceof Player)) {
             return;
         }
 
-        activateChunkLoader(worldIn, pos, (PlayerEntity)placer);
+        activateChunkLoader(levelIn, pos, (Player)placer);
     }
 
-    private static void activateChunkLoader(World worldIn, BlockPos pos, PlayerEntity placer)
+    private static void activateChunkLoader(Level levelIn, BlockPos pos, Player placer)
     {
-        if (worldIn.isRemote) { return; }
+        if (levelIn.isClientSide) { return; }
 
-        if (worldIn == null) {
-            WeirdingGadgetMod.LOGGER.error("While attempting to active a Weirding Gadget, Somehow, the world was null?");
+        if (levelIn == null) {
+            WeirdingGadgetMod.LOGGER.error("While attempting to active a Weirding Gadget, Somehow, the level was null?");
             return;
         }
 
@@ -97,88 +108,81 @@ public class WeirdingGadgetBlock extends Block
             return;
         }
 
-        final WeirdingGadgetTicket ticket = WeirdingGadgetChunkManager.requestPlayerTicket(WeirdingGadgetMod.instance, placer.getName().getString(), worldIn, Type.NORMAL);
+        final WeirdingGadgetTicket ticket = WeirdingGadgetChunkManager.requestPlayerTicket(WeirdingGadgetMod.instance, placer.getName().getString(), levelIn, Type.NORMAL);
 
         if (ticket == null) {
             //Player has requested too many tickets. Forge will log an issue here.
             return;
         }
 
-        final CompoundNBT modData = ticket.getModData();
-        modData.put("blockPosition", NBTUtil.writeBlockPos(pos));
+        final CompoundTag modData = ticket.getModData();
+        modData.put("blockPosition", NbtUtils.writeBlockPos(pos));
         modData.putInt("size", Settings.SERVER.chunkLoaderWidth.get());
 
-        TicketUtils.activateTicket(worldIn, ticket);
+        TicketUtils.activateTicket(levelIn, ticket);
     }
 
     @Override
     @Deprecated
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-        if (worldIn.isRemote) { return ActionResultType.SUCCESS; }
+    public InteractionResult use(BlockState state, Level levelIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+        if (levelIn.isClientSide) { return InteractionResult.SUCCESS; }
 
-        final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)worldIn.getTileEntity(pos);
-        if (tileEntity == null) return ActionResultType.FAIL;
+        final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)levelIn.getBlockEntity(pos);
+        if (tileEntity == null) return InteractionResult.FAIL;
 
         if (tileEntity.isExpired() || !tileEntity.hasTicket(player)) {
 
-            activateChunkLoader(worldIn, pos, player);
+            activateChunkLoader(levelIn, pos, player);
 
-            return ActionResultType.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
-        return ActionResultType.FAIL;
-    }
-
-    @Override
-    public boolean hasTileEntity(BlockState state) {
-        return true;
+        return InteractionResult.FAIL;
     }
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return TileEntityTypeLibrary.weirding_gadget.create();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return TileEntityTypeLibrary.weirding_gadget.create(pos, state);
     }
 
     @Override
-    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
+    public RenderShape getRenderShape(BlockState p_56255_) {
+        return RenderShape.MODEL;
+    }
+
+    @Override
+    @Deprecated
+    public PushReaction getPistonPushReaction(BlockState p_56265_) {
+        return PushReaction.DESTROY;
+    }
+
+    @Override
+    public int getLightEmission(BlockState state, BlockGetter world, BlockPos pos) {
         return 5;
     }
 
     @Override
     @Deprecated
-    public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+    public void onRemove(BlockState state, Level levelIn, BlockPos pos, BlockState newState, boolean isMoving) {
         if (newState.getBlock() == this) return;
-        final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)worldIn.getTileEntity(pos);
+        final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)levelIn.getBlockEntity(pos);
         if (tileEntity == null) return;
 
         tileEntity.expireAllTickets();
 
-        super.onReplaced(state, worldIn, pos, newState, isMoving);
+        super.onRemove(state, levelIn, pos, newState, isMoving);
     }
 
     ///////////// Rendering //////////////
 
-    final VoxelShape AABB = Block.makeCuboidShape(
-            3, 0, 3, 13, 16, 13
+    final VoxelShape AABB = Shapes.create(
+            3/16.0, 0/16.0, 3/16.0, 13/16.0, 16/16.0, 13/16.0
     );
 
     @Override
     @Deprecated
-    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter levelIn, BlockPos pos, CollisionContext context) {
         return AABB;
-    }
-
-    ///////////// Networking /////////////////
-
-
-    @Override
-    @Deprecated
-    public boolean eventReceived(BlockState state, World worldIn, BlockPos pos, int id, int param) {
-        final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)worldIn.getTileEntity(pos);
-        if (tileEntity == null) return false;
-
-        tileEntity.receiveClientEvent(id, param);
-        return true;
     }
 }

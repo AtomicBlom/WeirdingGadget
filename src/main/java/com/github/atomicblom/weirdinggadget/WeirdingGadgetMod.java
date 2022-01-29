@@ -6,9 +6,10 @@ import com.github.atomicblom.weirdinggadget.client.WeirdingGadgetTileEntityRende
 import com.github.atomicblom.weirdinggadget.library.TileEntityTypeLibrary;
 import com.github.atomicblom.weirdinggadget.registration.CapabilityWeirdingGadgetTicketList;
 import com.google.common.collect.ListMultimap;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
@@ -16,12 +17,12 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fmlclient.registry.ClientRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,40 +49,36 @@ public class WeirdingGadgetMod
         instance = this;
 
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener(this::setup);
-        modEventBus.addListener(this::clientSetup);
+//        modEventBus.addListener(this::setup);
+//        modEventBus.addListener(this::clientSetup);
         modEventBus.addListener(this::modelRegistryEvent);
-        MinecraftForge.EVENT_BUS.addGenericListener(World.class, this::attachWorldCapabilities);
-        MinecraftForge.EVENT_BUS.addListener(this::worldLoaded);
+        MinecraftForge.EVENT_BUS.addGenericListener(Level.class, this::attachLevelCapabilities);
+        MinecraftForge.EVENT_BUS.addListener(this::levelLoaded);
 
         final ModLoadingContext modContext = ModLoadingContext.get();
         modContext.registerConfig(ModConfig.Type.COMMON, Settings.ServerSpec, "WeirdingGadget.toml");
         modContext.registerConfig(ModConfig.Type.COMMON, Settings.LimitSpec, "WeirdingGadgetLimits.toml");
     }
 
-    private void setup(final FMLCommonSetupEvent event)
-    {
-        CapabilityWeirdingGadgetTicketList.register();
-    }
-
     private void modelRegistryEvent(final ModelRegistryEvent event) {
         ModelLoaderRegistry.registerLoader(Reference.ItemLoader, new ForceISTERModel.Loader());
     }
 
-    private void clientSetup(final FMLClientSetupEvent event) {
-        ClientRegistry.bindTileEntityRenderer(TileEntityTypeLibrary.weirding_gadget, WeirdingGadgetTileEntityRenderer::new);
-    }
+//    private void clientSetup(final FMLClientSetupEvent event) {
+//        ClientRegistry.bindTileEntityRenderer(TileEntityTypeLibrary.weirding_gadget, WeirdingGadgetTileEntityRenderer::new);
+//    }
 
-    public void worldLoaded(WorldEvent.Load worldLoadEvent) {
-        IWorld world = worldLoadEvent.getWorld();
-        if (world instanceof ServerWorld) {
-            ServerWorld serverWorld = ((ServerWorld) world);
-            serverWorld.getCapability(CapabilityWeirdingGadgetTicketList.TICKET_LIST_DATA).ifPresent(ticketList -> {
+    public void levelLoaded(WorldEvent.Load levelLoadEvent) {
+        LevelAccessor level = levelLoadEvent.getWorld();
+        if (level instanceof ServerLevelAccessor) {
+
+            ServerLevel serverLevel = ((ServerLevelAccessor) level).getLevel();
+            serverLevel.getCapability(CapabilityWeirdingGadgetTicketList.TICKET_LIST_DATA).ifPresent(ticketList -> {
                 Map<String, List<WeirdingGadgetTicket>> playerTickets = ticketList.getAllTickets()
                         .stream()
                         .collect(Collectors.groupingBy(WeirdingGadgetTicket::getPlayerName));
 
-                final ListMultimap<String, WeirdingGadgetTicket> usedTickets = ChunkManagerCallback.playerTicketsLoaded(playerTickets, serverWorld);
+                final ListMultimap<String, WeirdingGadgetTicket> usedTickets = ChunkManagerCallback.playerTicketsLoaded(playerTickets, serverLevel);
 
                 Set<UUID> knownTickets = ticketList.getAllTickets().stream().map(WeirdingGadgetTicket::getId).collect(Collectors.toSet());
                 for (WeirdingGadgetTicket weirdingGadgetTicket : new ArrayList<>(usedTickets.values())) {
@@ -92,12 +89,12 @@ public class WeirdingGadgetMod
                     ticketList.removeTicket(removedTicket);
                 }
 
-                ChunkManagerCallback.ticketsLoaded(ticketList.getAllTickets(), serverWorld);
+                ChunkManagerCallback.ticketsLoaded(ticketList.getAllTickets(), serverLevel);
             });
         }
     }
 
-    public void attachWorldCapabilities(AttachCapabilitiesEvent<World> worldCapabilities) {
-        worldCapabilities.addCapability(Reference.Capability.weirding_gadget, new CapabilityWeirdingGadgetTicketList.WeirdingGadgetTicketListProvider());
+    public void attachLevelCapabilities(AttachCapabilitiesEvent<Level> levelCapabilities) {
+        levelCapabilities.addCapability(Reference.Capability.weirding_gadget, new CapabilityWeirdingGadgetTicketList.WeirdingGadgetTicketListProvider());
     }
 }

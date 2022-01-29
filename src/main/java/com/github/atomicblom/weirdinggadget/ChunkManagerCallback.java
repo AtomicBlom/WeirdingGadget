@@ -4,28 +4,28 @@ import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetTicket;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ListMultimap;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.Map;
 
 public final class ChunkManagerCallback
 {
-    public static void ticketsLoaded(ImmutableCollection<WeirdingGadgetTicket> tickets, World world)
+    public static void ticketsLoaded(ImmutableCollection<WeirdingGadgetTicket> tickets, Level level)
     {
         for (final WeirdingGadgetTicket ticket : tickets)
         {
-            final CompoundNBT modData = ticket.getModData();
+            final CompoundTag modData = ticket.getModData();
             if (!modData.contains("blockPosition")) {
                 continue;
             }
 
-            TicketUtils.activateTicket(world, ticket);
+            TicketUtils.activateTicket(level, ticket);
         }
     }
 
-    public static ListMultimap<String, WeirdingGadgetTicket> playerTicketsLoaded(Map<String, List<WeirdingGadgetTicket>> tickets, World world)
+    public static ListMultimap<String, WeirdingGadgetTicket> playerTicketsLoaded(Map<String, List<WeirdingGadgetTicket>> tickets, Level level)
     {
         final ListMultimap<String, WeirdingGadgetTicket> returnedTickets = ArrayListMultimap.create();
 
@@ -38,7 +38,7 @@ public final class ChunkManagerCallback
             final String player = playerTicketMap.getKey();
             for (final WeirdingGadgetTicket ticket : playerTicketMap.getValue())
             {
-                if (TicketUtils.isTicketValid(world, ticket)) {
+                if (TicketUtils.isTicketValid(level, ticket)) {
                     returnedTickets.put(player, ticket);
                 }
             }

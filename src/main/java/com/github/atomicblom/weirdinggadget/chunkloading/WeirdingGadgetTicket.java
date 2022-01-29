@@ -1,10 +1,10 @@
 package com.github.atomicblom.weirdinggadget.chunkloading;
 
 import com.google.common.collect.Maps;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.server.Ticket;
-import net.minecraft.world.server.TicketType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.Ticket;
+import net.minecraft.server.level.TicketType;
+import net.minecraft.world.level.ChunkPos;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -12,13 +12,13 @@ import java.util.Set;
 import java.util.UUID;
 
 public class WeirdingGadgetTicket {
-    public static final TicketType<ChunkPos> WEIRDING_GADGET = TicketType.create("weirding_gadget", Comparator.comparingLong(ChunkPos::asLong));
+    public static final TicketType<ChunkPos> WEIRDING_GADGET = TicketType.create("weirding_gadget", Comparator.comparingLong(ChunkPos::toLong));
     public static final int TICKET_LEVEL = 31;
 
     private final String playerName;
     private final UUID id;
     private final String modName;
-    private CompoundNBT modData;
+    private CompoundTag modData;
 
     private final Map<Long, Ticket<ChunkPos>> vanillaTickets = Maps.newHashMap();
 
@@ -28,14 +28,14 @@ public class WeirdingGadgetTicket {
         this.playerName = playerName;
     }
 
-    public CompoundNBT getModData() {
+    public CompoundTag getModData() {
         if (modData == null) {
-            modData = new CompoundNBT();
+            modData = new CompoundTag();
         }
         return modData;
     }
 
-    public void setModData(CompoundNBT modData) {
+    public void setModData(CompoundTag modData) {
         this.modData = modData;
     }
 
@@ -50,8 +50,8 @@ public class WeirdingGadgetTicket {
     public Ticket<ChunkPos> getOrCreateTicket(ChunkPos ticketChunk) {
         return vanillaTickets
                 .computeIfAbsent(
-                        ticketChunk.asLong(),
-                        (pos) -> new Ticket<>(WEIRDING_GADGET, TICKET_LEVEL, ticketChunk)
+                        ticketChunk.toLong(),
+                        (pos) -> new Ticket<>(WEIRDING_GADGET, TICKET_LEVEL, ticketChunk, true)
                 );
     }
 

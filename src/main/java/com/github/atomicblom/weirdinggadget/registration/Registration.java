@@ -3,18 +3,20 @@ package com.github.atomicblom.weirdinggadget.registration;
 import com.github.atomicblom.weirdinggadget.Reference;
 import com.github.atomicblom.weirdinggadget.block.WeirdingGadgetBlock;
 import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
-import com.github.atomicblom.weirdinggadget.client.WeirdingGadgetItemRenderer;
+import com.github.atomicblom.weirdinggadget.client.WeirdingGadgetTileEntityRenderer;
 import com.github.atomicblom.weirdinggadget.item.WeirdingGadgetItem;
 import com.github.atomicblom.weirdinggadget.library.BlockLibrary;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraftforge.common.ToolType;
+import com.github.atomicblom.weirdinggadget.library.TileEntityTypeLibrary;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MaterialColor;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -26,19 +28,18 @@ public class Registration
     @SubscribeEvent
     public static void registerBlocks(Register<Block> event) {
         final IForgeRegistry<Block> registry = event.getRegistry();
-        final AbstractBlock.Properties properties = AbstractBlock.Properties.create(Material.IRON, MaterialColor.YELLOW)
-                .hardnessAndResistance(3.0f, 5.0f)
-                .sound(SoundType.METAL)
-                .harvestTool(ToolType.AXE);
+        final BlockBehaviour.Properties properties = BlockBehaviour.Properties.of(Material.METAL, MaterialColor.COLOR_YELLOW)
+                .strength(3.0f, 5.0f)
+                .sound(SoundType.METAL);
 
         registry.register(new WeirdingGadgetBlock(properties).setRegistryName(Reference.Block.weirding_gadget));
     }
 
     @SubscribeEvent
-    public static void registerTileEntity(Register<TileEntityType<?>> event) {
-        final IForgeRegistry<TileEntityType<?>> registry = event.getRegistry();
-        final TileEntityType<?> tileEntityType = TileEntityType.Builder
-                .create(WeirdingGadgetTileEntity::new, BlockLibrary.weirding_gadget)
+    public static void registerTileEntity(Register<BlockEntityType<?>> event) {
+        final IForgeRegistry<BlockEntityType<?>> registry = event.getRegistry();
+        final BlockEntityType<?> tileEntityType = BlockEntityType.Builder
+                .of(WeirdingGadgetTileEntity::new, BlockLibrary.weirding_gadget)
                 .build(null)
                 .setRegistryName(Reference.Block.weirding_gadget);
         registry.register(tileEntityType);
@@ -51,11 +52,21 @@ public class Registration
                 new WeirdingGadgetItem(
                         BlockLibrary.weirding_gadget,
                         new Item.Properties()
-                                .group(ItemGroup.MISC)
-                                .setISTER(() -> WeirdingGadgetItemRenderer::new))
+                                .tab(CreativeModeTab.TAB_MISC))
 
                     .setRegistryName(Reference.Block.weirding_gadget)
         );
+    }
+
+    @SubscribeEvent
+    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(TileEntityTypeLibrary.weirding_gadget, WeirdingGadgetTileEntityRenderer::new);
+
+    }
+
+    @SubscribeEvent
+    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.register(CapabilityWeirdingGadgetTicketList.TicketListData.class);
     }
 }
 
