@@ -33,7 +33,7 @@ version = (hasProperty("CIRevision") ? CIRevision : project.mod_version)
 group = project.group_name
 archivesBaseName = "${project.mod_id}-${project.minecraft_version_on_jar}"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(16)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
@@ -105,7 +105,7 @@ repositories {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:' + project.minecraft_version + '-' + project.forge_version
-    runtimeOnly fg.deobf("mezz.jei:jei-1.17.1:" + project.jei_version)
+    runtimeOnly fg.deobf("mezz.jei:jei-1.18.1:" + project.jei_version)
 
     if (!isCIBuild && project.hasProperty('immersiveengineering_version')) {
         runtimeOnly fg.deobf('blusunrize.immersiveengineering:ImmersiveEngineering:' + project.immersiveengineering_version)

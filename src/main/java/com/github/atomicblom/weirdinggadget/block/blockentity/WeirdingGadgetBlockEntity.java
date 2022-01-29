@@ -219,7 +219,7 @@ public class WeirdingGadgetBlockEntity extends BlockEntity
 
     @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return new ClientboundBlockEntityDataPacket(worldPosition, ACTIVE_STATE_CHANGED, getUpdateTag());
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
