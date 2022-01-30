@@ -63,7 +63,7 @@ public class WeirdingGadgetTileEntity extends BlockEntity
         tickets.add(ticket);
 
         getBlockState().triggerEvent(level, worldPosition, ACTIVE_STATE_CHANGED, 1);
-        expireTime = -1;
+        setExpireTime(-1);
         WeirdingGadgetMod.LOGGER.info("Waking up Chunk Loader at {} because {} placed/interacted with it", worldPosition, playerName);
     }
 
@@ -135,7 +135,7 @@ public class WeirdingGadgetTileEntity extends BlockEntity
                 if (PlayerByName != null)
                 {
                     //reset the expiry
-                    entity.expireTime = -1;
+                    entity.setExpireTime(-1);
                     //start tracking the player
                     entity.trackedPlayers.add(new WeakReference<>(PlayerByName));
                     WeirdingGadgetMod.LOGGER.info("Chunk Loader at {} in {} is revived because {} returned", entity.worldPosition, dimensionName, PlayerByName.getName().getString());
@@ -153,7 +153,7 @@ public class WeirdingGadgetTileEntity extends BlockEntity
         {
             final int timeout = Settings.SERVER.hoursBeforeDeactivation.get() * WeirdingGadgetMod.MULTIPLIER;
             //final int timeout = 10 * 20;
-            entity.expireTime = totalLevelTime + timeout;
+            entity.setExpireTime(totalLevelTime + timeout);
             WeirdingGadgetMod.LOGGER.info("All players registered to this gadget at {} in {} have gone offline. Ticket is scheduled to expire at level time {}", pos, dimensionName, entity.expireTime);
         }
 
@@ -172,17 +172,23 @@ public class WeirdingGadgetTileEntity extends BlockEntity
         }
     }
 
-    @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
-        expireTime = nbt.contains("expireTime") ? nbt.getLong("expireTime") : -1;
+    private void setExpireTime(long expireTime) {
+        this.expireTime = expireTime;
+        this.getTileData().putLong("expireTime", expireTime);
     }
 
     @Override
-    public CompoundTag save(CompoundTag compound) {
-        super.save(compound);
-        compound.putLong("expireTime", expireTime);
-        return compound;
+    public void load(CompoundTag nbt) {
+        super.load(nbt);
+        CompoundTag tileData = getTileData();
+
+        //Legacy nbt tag, moved to tile data.
+        //Will be removed in 1.19+
+        if (nbt.contains("expireTime")) {
+            tileData.putLong("expireTime", nbt.contains("expireTime") ? nbt.getLong("expireTime") : -1);
+        }
+
+        expireTime = tileData.contains("expireTime") ? tileData.getLong("expireTime") : -1;
     }
 
     @Override
