@@ -27,10 +27,10 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 
-public class ForceISTERModel implements BakedModel {
+public class WeirdingGadgetItemModel implements BakedModel {
     private final IModelConfiguration owner;
 
-    public ForceISTERModel(IModelConfiguration owner) {
+    public WeirdingGadgetItemModel(IModelConfiguration owner) {
 
         this.owner = owner;
     }
@@ -107,7 +107,7 @@ public class ForceISTERModel implements BakedModel {
 
         @Override
         public BakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
-            return new ForceISTERModel(owner);
+            return new WeirdingGadgetItemModel(owner);
         }
     }
 }

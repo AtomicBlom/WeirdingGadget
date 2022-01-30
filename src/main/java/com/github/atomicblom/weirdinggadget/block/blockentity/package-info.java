@@ -1,6 +1,6 @@
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-package com.github.atomicblom.weirdinggadget.block.tileentity;
+package com.github.atomicblom.weirdinggadget.block.blockentity;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 

@@ -58,10 +58,8 @@ public class CapabilityWeirdingGadgetTicketList {
             if (!tickets.containsKey(ticket.getId())) {
                 tickets.put(ticket.getId(), ticket);
 
-                if (ticket.getPlayerName() != null) {
-                    final var playerGadgets = playerTickets.computeIfAbsent(ticket.getPlayerName(), p -> Sets.newHashSet());
-                    playerGadgets.add(ticket.getId());
-                }
+                final var playerGadgets = playerTickets.computeIfAbsent(ticket.getPlayerName(), p -> Sets.newHashSet());
+                playerGadgets.add(ticket.getId());
 
                 final var modGadgets = modTickets.computeIfAbsent(ticket.getModName(), p -> Sets.newHashSet());
                 modGadgets.add(ticket.getId());
@@ -97,23 +95,19 @@ public class CapabilityWeirdingGadgetTicketList {
             var ticketList = new ListTag();
             for (var ticket : tickets.values()) {
                 var ticketData = new CompoundTag();
-                if (ticket.getPlayerName() != null) {
-                    ticketData.putString("playerName", ticket.getPlayerName());
-                }
+                ticketData.putString("playerName", ticket.getPlayerName());
                 ticketData.putString("modName", ticket.getModName());
                 var modData = ticket.getModData();
-                if (modData != null) {
-                    ticketData.put("data", modData);
-                }
+                ticketData.put("data", modData);
                 ticketList.add(ticketData);
             }
 
             return ticketList;
         }
 
-        public void readFromNBT(ListTag nbt) {
-            for (var inbt : nbt) {
-                if (!(inbt instanceof CompoundTag ticketData)) continue;
+        public void readFromNBT(ListTag tagList) {
+            for (var tag : tagList) {
+                if (!(tag instanceof CompoundTag ticketData)) continue;
 
                 var playerName = ticketData.getString("playerName");
                 var modName = ticketData.getString("modName");

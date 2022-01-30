@@ -2,11 +2,11 @@ package com.github.atomicblom.weirdinggadget.registration;
 
 import com.github.atomicblom.weirdinggadget.Reference;
 import com.github.atomicblom.weirdinggadget.block.WeirdingGadgetBlock;
-import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
-import com.github.atomicblom.weirdinggadget.client.WeirdingGadgetTileEntityRenderer;
+import com.github.atomicblom.weirdinggadget.block.blockentity.WeirdingGadgetBlockEntity;
+import com.github.atomicblom.weirdinggadget.client.WeirdingGadgetBlockEntityRenderer;
 import com.github.atomicblom.weirdinggadget.item.WeirdingGadgetItem;
 import com.github.atomicblom.weirdinggadget.library.BlockLibrary;
-import com.github.atomicblom.weirdinggadget.library.TileEntityTypeLibrary;
+import com.github.atomicblom.weirdinggadget.library.BlockEntityTypeLibrary;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -35,13 +35,13 @@ public class Registration
     }
 
     @SubscribeEvent
-    public static void registerTileEntity(Register<BlockEntityType<?>> event) {
+    public static void registerBlockEntity(Register<BlockEntityType<?>> event) {
         final var registry = event.getRegistry();
-        final var tileEntityType = BlockEntityType.Builder
-                .of(WeirdingGadgetTileEntity::new, BlockLibrary.weirding_gadget)
-                .build(null)
+        final var blockEntityType = BlockEntityType.Builder
+                .of(WeirdingGadgetBlockEntity::new, BlockLibrary.weirding_gadget)
+                .build( null)
                 .setRegistryName(Reference.Block.weirding_gadget);
-        registry.register(tileEntityType);
+        registry.register(blockEntityType);
     }
 
     @SubscribeEvent
@@ -59,7 +59,7 @@ public class Registration
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(TileEntityTypeLibrary.weirding_gadget, WeirdingGadgetTileEntityRenderer::new);
+        event.registerBlockEntityRenderer(BlockEntityTypeLibrary.weirding_gadget, WeirdingGadgetBlockEntityRenderer::new);
 
     }
 

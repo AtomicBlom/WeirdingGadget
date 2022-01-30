@@ -23,7 +23,8 @@ public class WeirdingGadgetChunkManager {
         final var chunkProvider = level.getChunkSource();
         if (!(chunkProvider instanceof ServerChunkCache chunkManager)) throw new RuntimeException("Attempted to force a chunk on the wrong side");
 
-        final var capability = level.getCapability(CapabilityWeirdingGadgetTicketList.TICKET_LIST_DATA)
+        final var capability = level
+                .getCapability(CapabilityWeirdingGadgetTicketList.TICKET_LIST_DATA)
                 .orElseThrow(() -> new RuntimeException("Missing Weirding Gadget Capability"));
         capability.removeTicket(ticket.getId());
 
@@ -35,10 +36,10 @@ public class WeirdingGadgetChunkManager {
             chunkManager.distanceManager.removeTicket(chunkId, vanillaTicket.getValue());
             final var ticketSet = chunkManager.distanceManager.getTickets(chunkId);
             if (ticketSet.size() == 0) {
-                var forcedchunkssavedata = serverLevel.getDataStorage().computeIfAbsent(ForcedChunksSavedData::load, ForcedChunksSavedData::new, "chunks");
+                var forcedChunksSavedData = serverLevel.getDataStorage().computeIfAbsent(ForcedChunksSavedData::load, ForcedChunksSavedData::new, "chunks");
                 WeirdingGadgetMod.LOGGER.debug(ChunkManager, "removing {} from forced chunks in {}", chunkPos, level.dimension().getRegistryName());
-                var removed = forcedchunkssavedata.getChunks().remove(chunkId);
-                forcedchunkssavedata.setDirty(removed);
+                var removed = forcedChunksSavedData.getChunks().remove(chunkId);
+                forcedChunksSavedData.setDirty(removed);
             } else {
                 WeirdingGadgetMod.LOGGER.debug(ChunkManager, "not removing {} from forced chunks in {} because there are {} tickets left", chunkPos, level.dimension().getRegistryName(), ticketSet.size());
             }
@@ -50,7 +51,8 @@ public class WeirdingGadgetChunkManager {
         var modAnnotation = modInstance.getClass().getAnnotation(Mod.class);
         var modName = modAnnotation.value();
 
-        final var capability = level.getCapability(CapabilityWeirdingGadgetTicketList.TICKET_LIST_DATA)
+        final var capability = level
+                .getCapability(CapabilityWeirdingGadgetTicketList.TICKET_LIST_DATA)
                 .orElseThrow(() -> new RuntimeException("Missing Weirding Gadget Capability"));
 
         //Verify that mod has enough ticket quota available
@@ -92,13 +94,13 @@ public class WeirdingGadgetChunkManager {
 
         var existingTicket = ticket.getOrCreateTicket(ticketChunk);
 
-        var forcedchunkssavedata = serverLevel.getDataStorage().computeIfAbsent(ForcedChunksSavedData::load, ForcedChunksSavedData::new, "chunks");
-        var added = forcedchunkssavedata.getChunks().add(ticketChunk.toLong());
+        var forcedChunksSavedData = serverLevel.getDataStorage().computeIfAbsent(ForcedChunksSavedData::load, ForcedChunksSavedData::new, "chunks");
+        var added = forcedChunksSavedData.getChunks().add(ticketChunk.toLong());
         if (added) {
             WeirdingGadgetMod.LOGGER.debug(ChunkManager, "Added {} to the forced chunk list of {}", ticketChunk, level.dimension().getRegistryName());
             serverLevel.getChunk(ticketChunk.x, ticketChunk.z);
         }
-        forcedchunkssavedata.setDirty(added);
+        forcedChunksSavedData.setDirty(added);
         chunkManager.distanceManager.addTicket(ticketChunk.toLong(), existingTicket);
         WeirdingGadgetMod.LOGGER.debug(ChunkManager, "Registered {} to the ticket manager", existingTicket);
     }

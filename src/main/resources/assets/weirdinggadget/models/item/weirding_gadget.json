@@ -1,6 +1,6 @@
 {
 	"parent": "minecraft:block/block",
-	"loader": "weirdinggadget:force_ister",
+	"loader": "weirdinggadget:item_renderer",
 	"display": {
 		"head": {
 			"translation": [ 0, 1, 0]

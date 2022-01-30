@@ -1,7 +1,7 @@
 package com.github.atomicblom.weirdinggadget;
 
 import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetTicket;
-import com.github.atomicblom.weirdinggadget.client.ForceISTERModel;
+import com.github.atomicblom.weirdinggadget.client.WeirdingGadgetItemModel;
 import com.github.atomicblom.weirdinggadget.registration.CapabilityWeirdingGadgetTicketList;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -50,7 +50,7 @@ public class WeirdingGadgetMod
     }
 
     private void modelRegistryEvent(final ModelRegistryEvent event) {
-        ModelLoaderRegistry.registerLoader(Reference.ItemLoader, new ForceISTERModel.Loader());
+        ModelLoaderRegistry.registerLoader(Reference.ItemLoader, new WeirdingGadgetItemModel.Loader());
     }
 
     public void levelLoaded(WorldEvent.Load levelLoadEvent) {

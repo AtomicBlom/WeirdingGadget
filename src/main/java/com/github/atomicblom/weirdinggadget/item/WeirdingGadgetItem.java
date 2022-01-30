@@ -11,8 +11,8 @@ import net.minecraftforge.common.extensions.IForgeItem;
 import java.util.function.Consumer;
 
 public class WeirdingGadgetItem extends BlockItem implements IForgeItem {
-    public WeirdingGadgetItem(Block blockIn, Properties builder) {
-        super(blockIn, builder);
+    public WeirdingGadgetItem(Block block, Properties builder) {
+        super(block, builder);
     }
 
     @Override

@@ -41,15 +41,15 @@ public class WeirdingGadgetItemRenderer extends BlockEntityWithoutLevelRenderer 
     }
 
     @Override
-    public void renderByItem(ItemStack stack, ItemTransforms.TransformType p_239207_2_, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+    public void renderByItem(ItemStack stack, ItemTransforms.TransformType transformType, PoseStack poseStack, MultiBufferSource multiBufferSource, int combinedLight, int combinedOverlay) {
         ModelBlockRenderer.enableCaching();
-        matrixStack.pushPose();
+        poseStack.pushPose();
         float angle = 0;
-        if (p_239207_2_ == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND ||
-                p_239207_2_ == ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND ||
-                p_239207_2_ == ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND ||
-                p_239207_2_ == ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND ||
-                p_239207_2_ == ItemTransforms.TransformType.HEAD
+        if (transformType == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND ||
+                transformType == ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND ||
+                transformType == ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND ||
+                transformType == ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND ||
+                transformType == ItemTransforms.TransformType.HEAD
         ) {
             angle = System.currentTimeMillis() % (360 * 4) / 4.0f;
         }
@@ -63,14 +63,14 @@ public class WeirdingGadgetItemRenderer extends BlockEntityWithoutLevelRenderer 
         final var spinnerState = baseState
                 .setValue(WeirdingGadgetBlock.RENDER, RenderType.DYNAMIC);
 
-        blockRenderer.renderSingleBlock(baseState, matrixStack, buffer, combinedLight, combinedOverlay, EmptyModelData.INSTANCE);
+        blockRenderer.renderSingleBlock(baseState, poseStack, multiBufferSource, combinedLight, combinedOverlay, EmptyModelData.INSTANCE);
 
-        matrixStack.translate(0.5f, 0, 0.5f);
-        matrixStack.mulPose(new Quaternion(Vector3f.YP, angle, true));
-        matrixStack.translate(-0.5f, 0, -0.5f);
+        poseStack.translate(0.5f, 0, 0.5f);
+        poseStack.mulPose(new Quaternion(Vector3f.YP, angle, true));
+        poseStack.translate(-0.5f, 0, -0.5f);
 
-        blockRenderer.renderSingleBlock(spinnerState, matrixStack, buffer, combinedLight, combinedOverlay, EmptyModelData.INSTANCE);
-        matrixStack.popPose();
+        blockRenderer.renderSingleBlock(spinnerState, poseStack, multiBufferSource, combinedLight, combinedOverlay, EmptyModelData.INSTANCE);
+        poseStack.popPose();
 
     }
 }
