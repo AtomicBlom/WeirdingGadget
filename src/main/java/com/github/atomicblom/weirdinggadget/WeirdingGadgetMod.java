@@ -2,8 +2,6 @@ package com.github.atomicblom.weirdinggadget;
 
 import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetTicket;
 import com.github.atomicblom.weirdinggadget.client.ForceISTERModel;
-import com.github.atomicblom.weirdinggadget.client.WeirdingGadgetTileEntityRenderer;
-import com.github.atomicblom.weirdinggadget.library.TileEntityTypeLibrary;
 import com.github.atomicblom.weirdinggadget.registration.CapabilityWeirdingGadgetTicketList;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.server.level.ServerLevel;
@@ -19,10 +17,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fmlclient.registry.ClientRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,8 +44,6 @@ public class WeirdingGadgetMod
         instance = this;
 
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-//        modEventBus.addListener(this::setup);
-//        modEventBus.addListener(this::clientSetup);
         modEventBus.addListener(this::modelRegistryEvent);
         MinecraftForge.EVENT_BUS.addGenericListener(Level.class, this::attachLevelCapabilities);
         MinecraftForge.EVENT_BUS.addListener(this::levelLoaded);
@@ -63,10 +56,6 @@ public class WeirdingGadgetMod
     private void modelRegistryEvent(final ModelRegistryEvent event) {
         ModelLoaderRegistry.registerLoader(Reference.ItemLoader, new ForceISTERModel.Loader());
     }
-
-//    private void clientSetup(final FMLClientSetupEvent event) {
-//        ClientRegistry.bindTileEntityRenderer(TileEntityTypeLibrary.weirding_gadget, WeirdingGadgetTileEntityRenderer::new);
-//    }
 
     public void levelLoaded(WorldEvent.Load levelLoadEvent) {
         LevelAccessor level = levelLoadEvent.getWorld();
