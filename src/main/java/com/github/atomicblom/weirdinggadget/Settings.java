@@ -72,11 +72,11 @@ public class Settings {
     static final ForgeConfigSpec LimitSpec;
     public static final ChunkLoaderLimits CHUNK_LOADER_LIMITS;
     static {
-        final Pair<Server, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Server::new);
+        final var specPair = new ForgeConfigSpec.Builder().configure(Server::new);
         ServerSpec = specPair.getRight();
         SERVER = specPair.getLeft();
 
-        final Pair<ChunkLoaderLimits, ForgeConfigSpec> limitSpecPair = new ForgeConfigSpec.Builder().configure(ChunkLoaderLimits::new);
+        final var limitSpecPair = new ForgeConfigSpec.Builder().configure(ChunkLoaderLimits::new);
         LimitSpec = limitSpecPair.getRight();
         CHUNK_LOADER_LIMITS = limitSpecPair.getLeft();
     }

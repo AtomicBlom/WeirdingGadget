@@ -108,14 +108,14 @@ public class WeirdingGadgetBlock extends BaseEntityBlock
             return;
         }
 
-        final WeirdingGadgetTicket ticket = WeirdingGadgetChunkManager.requestPlayerTicket(WeirdingGadgetMod.instance, placer.getName().getString(), levelIn, Type.NORMAL);
+        final var ticket = WeirdingGadgetChunkManager.requestPlayerTicket(WeirdingGadgetMod.instance, placer.getName().getString(), levelIn, Type.NORMAL);
 
         if (ticket == null) {
             //Player has requested too many tickets. Forge will log an issue here.
             return;
         }
 
-        final CompoundTag modData = ticket.getModData();
+        final var modData = ticket.getModData();
         modData.put("blockPosition", NbtUtils.writeBlockPos(pos));
         modData.putInt("size", Settings.SERVER.chunkLoaderWidth.get());
 
@@ -127,7 +127,7 @@ public class WeirdingGadgetBlock extends BaseEntityBlock
     public InteractionResult use(BlockState state, Level levelIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
         if (levelIn.isClientSide) { return InteractionResult.SUCCESS; }
 
-        final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)levelIn.getBlockEntity(pos);
+        final var tileEntity = (WeirdingGadgetTileEntity)levelIn.getBlockEntity(pos);
         if (tileEntity == null) return InteractionResult.FAIL;
 
         if (tileEntity.isExpired() || !tileEntity.hasTicket(player)) {
@@ -166,7 +166,7 @@ public class WeirdingGadgetBlock extends BaseEntityBlock
     @Deprecated
     public void onRemove(BlockState state, Level levelIn, BlockPos pos, BlockState newState, boolean isMoving) {
         if (newState.getBlock() == this) return;
-        final WeirdingGadgetTileEntity tileEntity = (WeirdingGadgetTileEntity)levelIn.getBlockEntity(pos);
+        final var tileEntity = (WeirdingGadgetTileEntity)levelIn.getBlockEntity(pos);
         if (tileEntity == null) return;
 
         tileEntity.expireAllTickets();

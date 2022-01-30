@@ -27,8 +27,8 @@ public class Registration
 {
     @SubscribeEvent
     public static void registerBlocks(Register<Block> event) {
-        final IForgeRegistry<Block> registry = event.getRegistry();
-        final BlockBehaviour.Properties properties = BlockBehaviour.Properties.of(Material.METAL, MaterialColor.COLOR_YELLOW)
+        final var registry = event.getRegistry();
+        final var properties = BlockBehaviour.Properties.of(Material.METAL, MaterialColor.COLOR_YELLOW)
                 .strength(3.0f, 5.0f)
                 .sound(SoundType.METAL);
 
@@ -37,8 +37,8 @@ public class Registration
 
     @SubscribeEvent
     public static void registerTileEntity(Register<BlockEntityType<?>> event) {
-        final IForgeRegistry<BlockEntityType<?>> registry = event.getRegistry();
-        final BlockEntityType<?> tileEntityType = BlockEntityType.Builder
+        final var registry = event.getRegistry();
+        final var tileEntityType = BlockEntityType.Builder
                 .of(WeirdingGadgetTileEntity::new, BlockLibrary.weirding_gadget)
                 .build(null)
                 .setRegistryName(Reference.Block.weirding_gadget);
@@ -47,7 +47,7 @@ public class Registration
 
     @SubscribeEvent
     public static void registerItems(Register<Item> event) {
-        final IForgeRegistry<Item> registry = event.getRegistry();
+        final var registry = event.getRegistry();
         registry.register(
                 new WeirdingGadgetItem(
                         BlockLibrary.weirding_gadget,

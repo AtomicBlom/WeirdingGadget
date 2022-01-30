@@ -43,12 +43,12 @@ public class WeirdingGadgetMod
 
         instance = this;
 
-        final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        final var modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::modelRegistryEvent);
         MinecraftForge.EVENT_BUS.addGenericListener(Level.class, this::attachLevelCapabilities);
         MinecraftForge.EVENT_BUS.addListener(this::levelLoaded);
 
-        final ModLoadingContext modContext = ModLoadingContext.get();
+        final var modContext = ModLoadingContext.get();
         modContext.registerConfig(ModConfig.Type.COMMON, Settings.ServerSpec, "WeirdingGadget.toml");
         modContext.registerConfig(ModConfig.Type.COMMON, Settings.LimitSpec, "WeirdingGadgetLimits.toml");
     }
@@ -58,23 +58,23 @@ public class WeirdingGadgetMod
     }
 
     public void levelLoaded(WorldEvent.Load levelLoadEvent) {
-        LevelAccessor level = levelLoadEvent.getWorld();
+        var level = levelLoadEvent.getWorld();
         if (level instanceof ServerLevelAccessor) {
 
-            ServerLevel serverLevel = ((ServerLevelAccessor) level).getLevel();
+            var serverLevel = ((ServerLevelAccessor) level).getLevel();
             serverLevel.getCapability(CapabilityWeirdingGadgetTicketList.TICKET_LIST_DATA).ifPresent(ticketList -> {
-                Map<String, List<WeirdingGadgetTicket>> playerTickets = ticketList.getAllTickets()
+                var playerTickets = ticketList.getAllTickets()
                         .stream()
                         .collect(Collectors.groupingBy(WeirdingGadgetTicket::getPlayerName));
 
-                final ListMultimap<String, WeirdingGadgetTicket> usedTickets = ChunkManagerCallback.playerTicketsLoaded(playerTickets, serverLevel);
+                final var usedTickets = ChunkManagerCallback.playerTicketsLoaded(playerTickets, serverLevel);
 
-                Set<UUID> knownTickets = ticketList.getAllTickets().stream().map(WeirdingGadgetTicket::getId).collect(Collectors.toSet());
-                for (WeirdingGadgetTicket weirdingGadgetTicket : new ArrayList<>(usedTickets.values())) {
+                var knownTickets = ticketList.getAllTickets().stream().map(WeirdingGadgetTicket::getId).collect(Collectors.toSet());
+                for (var weirdingGadgetTicket : new ArrayList<>(usedTickets.values())) {
                     knownTickets.remove(weirdingGadgetTicket.getId());
                 }
 
-                for (UUID removedTicket : knownTickets) {
+                for (var removedTicket : knownTickets) {
                     ticketList.removeTicket(removedTicket);
                 }
 

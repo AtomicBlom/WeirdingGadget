@@ -32,7 +32,7 @@ public class WeirdingGadgetTileEntityRenderer implements BlockEntityRenderer<Wei
 
     @Override
     public void render(WeirdingGadgetTileEntity tileEntityIn, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlayIn) {
-        Level level = tileEntityIn.getLevel();
+        var level = tileEntityIn.getLevel();
         if (level == null) return;
 
 //        RenderType type = RenderType.create("weirding_gadget", DefaultVertexFormat.BLOCK, VertexFormat.Mode.TRIANGLES, 2097152, true, false,
@@ -44,17 +44,17 @@ public class WeirdingGadgetTileEntityRenderer implements BlockEntityRenderer<Wei
 //                        .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
 //                        .createCompositeState(false)
 //        );
-        RenderType type = RenderType.solid();
+        var type = RenderType.solid();
 
-        final LocalPlayer player = Minecraft.getInstance().player;
+        final var player = Minecraft.getInstance().player;
         assert  player != null;
 
         float angle = 0;
-        boolean highlightGadgets = player.getItemBySlot(EquipmentSlot.HEAD).getItem() == ItemLibrary.weirding_gadget;
+        var highlightGadgets = player.getItemBySlot(EquipmentSlot.HEAD).getItem() == ItemLibrary.weirding_gadget;
         if (tileEntityIn.isActive()) {
             angle = System.currentTimeMillis() % (360 * 4) / 4.0f;
         }
-        boolean renderBaseFirst = player.getY() + player.getEyeHeight() > tileEntityIn.getBlockPos().get(Direction.Axis.Y) + 7.0f/16.0f;
+        var renderBaseFirst = player.getY() + player.getEyeHeight() > tileEntityIn.getBlockPos().get(Direction.Axis.Y) + 7.0f/16.0f;
 
         if (renderBaseFirst) {
             renderBase(tileEntityIn, matrixStackIn, bufferIn, combinedLightIn, combinedOverlayIn, type, highlightGadgets);
@@ -74,14 +74,14 @@ public class WeirdingGadgetTileEntityRenderer implements BlockEntityRenderer<Wei
     }
 
     private void renderSpinner(WeirdingGadgetTileEntity tileEntityIn, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlayIn, RenderType type, boolean highlightGadgets) {
-        final BlockState dynamicState = tileEntityIn.getBlockState()
+        final var dynamicState = tileEntityIn.getBlockState()
                 .setValue(WeirdingGadgetBlock.ACTIVE, true)
                 .setValue(WeirdingGadgetBlock.RENDER, com.github.atomicblom.weirdinggadget.block.RenderType.DYNAMIC);
         if (highlightGadgets) {
-            final VertexConsumer buffer = bufferIn.getBuffer(type);
+            final var buffer = bufferIn.getBuffer(type);
 
-            final ModelBlockRenderer blockModelRenderer = blockRenderer.getModelRenderer();
-            BakedModel ibakedmodel = blockRenderer.getBlockModel(dynamicState);
+            final var blockModelRenderer = blockRenderer.getModelRenderer();
+            var ibakedmodel = blockRenderer.getBlockModel(dynamicState);
 
 
             blockModelRenderer.renderModel(matrixStackIn.last(), buffer, dynamicState, ibakedmodel, 0.5f, 0.5f, 1f, combinedLightIn, combinedOverlayIn, EmptyModelData.INSTANCE);
@@ -93,17 +93,17 @@ public class WeirdingGadgetTileEntityRenderer implements BlockEntityRenderer<Wei
     private void renderBase(WeirdingGadgetTileEntity tileEntityIn, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlayIn, RenderType type, boolean highlightGadgets) {
         matrixStackIn.pushPose();
         matrixStackIn.scale(1.01f, 1.01f, 1.01f);
-        final BlockState staticState = tileEntityIn.getBlockState()
+        final var staticState = tileEntityIn.getBlockState()
                 .setValue(WeirdingGadgetBlock.ACTIVE, true)
                 .setValue(WeirdingGadgetBlock.RENDER, com.github.atomicblom.weirdinggadget.block.RenderType.STATIC);
         if (highlightGadgets) {
 
             //Render the base without the rotation
-            final VertexConsumer buffer = bufferIn.getBuffer(type);
-            final ModelBlockRenderer blockModelRenderer = blockRenderer.getModelRenderer();
+            final var buffer = bufferIn.getBuffer(type);
+            final var blockModelRenderer = blockRenderer.getModelRenderer();
 
 
-            BakedModel ibakedmodel = blockRenderer.getBlockModel(staticState);
+            var ibakedmodel = blockRenderer.getBlockModel(staticState);
             blockModelRenderer.renderModel(matrixStackIn.last(), buffer, staticState, ibakedmodel, 1, 1, 1, combinedLightIn, combinedOverlayIn, EmptyModelData.INSTANCE);
 
         }

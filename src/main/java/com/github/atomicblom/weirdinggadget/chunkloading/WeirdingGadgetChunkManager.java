@@ -26,28 +26,26 @@ public class WeirdingGadgetChunkManager {
     static Marker ChunkManager = new MarkerManager.Log4jMarker("WGChunkManager");
 
     public static void releaseTicket(Level level, WeirdingGadgetTicket ticket) {
-        if (!(level instanceof ServerLevel)) return;
-        ServerLevel serverLevel = (ServerLevel)level;
+        if (!(level instanceof ServerLevel serverLevel)) return;
 
-        final ChunkSource chunkProvider = level.getChunkSource();
-        if (!(chunkProvider instanceof ServerChunkCache)) throw new RuntimeException("Attempted to force a chunk on the wrong side");
-        ServerChunkCache chunkManager = ((ServerChunkCache) chunkProvider);
+        final var chunkProvider = level.getChunkSource();
+        if (!(chunkProvider instanceof ServerChunkCache chunkManager)) throw new RuntimeException("Attempted to force a chunk on the wrong side");
 
-        final CapabilityWeirdingGadgetTicketList.TicketListData capability = level.getCapability(CapabilityWeirdingGadgetTicketList.TICKET_LIST_DATA)
+        final var capability = level.getCapability(CapabilityWeirdingGadgetTicketList.TICKET_LIST_DATA)
                 .orElseThrow(() -> new RuntimeException("Missing Weirding Gadget Capability"));
         capability.removeTicket(ticket.getId());
 
-        for (Map.Entry<Long, Ticket<ChunkPos>> vanillaTicket : ticket.getVanillaTickets()) {
+        for (var vanillaTicket : ticket.getVanillaTickets()) {
             long chunkId = vanillaTicket.getKey();
-            ChunkPos chunkPos = new ChunkPos(chunkId);
+            var chunkPos = new ChunkPos(chunkId);
 
             WeirdingGadgetMod.LOGGER.debug(ChunkManager, "releasing ticket {} from chunk {} in {}", vanillaTicket.getValue(), level.dimension().getRegistryName(), chunkPos);
             chunkManager.distanceManager.removeTicket(chunkId, vanillaTicket.getValue());
-            final SortedArraySet<Ticket<?>> ticketSet = chunkManager.distanceManager.getTickets(chunkId);
+            final var ticketSet = chunkManager.distanceManager.getTickets(chunkId);
             if (ticketSet.size() == 0) {
-                ForcedChunksSavedData forcedchunkssavedata = serverLevel.getDataStorage().computeIfAbsent(ForcedChunksSavedData::load, ForcedChunksSavedData::new, "chunks");
+                var forcedchunkssavedata = serverLevel.getDataStorage().computeIfAbsent(ForcedChunksSavedData::load, ForcedChunksSavedData::new, "chunks");
                 WeirdingGadgetMod.LOGGER.debug(ChunkManager, "removing {} from forced chunks in {}", chunkPos, level.dimension().getRegistryName());
-                boolean removed = forcedchunkssavedata.getChunks().remove(chunkId);
+                var removed = forcedchunkssavedata.getChunks().remove(chunkId);
                 forcedchunkssavedata.setDirty(removed);
             } else {
                 WeirdingGadgetMod.LOGGER.debug(ChunkManager, "not removing {} from forced chunks in {} because there are {} tickets left", chunkPos, level.dimension().getRegistryName(), ticketSet.size());
@@ -57,10 +55,10 @@ public class WeirdingGadgetChunkManager {
 
     @Nullable
     public static WeirdingGadgetTicket requestPlayerTicket(Object modInstance, String playerName, Level level, Type requestType) {
-        Mod modAnnotation = modInstance.getClass().getAnnotation(Mod.class);
-        String modName = modAnnotation.value();
+        var modAnnotation = modInstance.getClass().getAnnotation(Mod.class);
+        var modName = modAnnotation.value();
 
-        final CapabilityWeirdingGadgetTicketList.TicketListData capability = level.getCapability(CapabilityWeirdingGadgetTicketList.TICKET_LIST_DATA)
+        final var capability = level.getCapability(CapabilityWeirdingGadgetTicketList.TICKET_LIST_DATA)
                 .orElseThrow(() -> new RuntimeException("Missing Weirding Gadget Capability"));
 
         //Verify that mod has enough ticket quota available
@@ -85,27 +83,25 @@ public class WeirdingGadgetChunkManager {
     }
 
     public static void forceChunk(Level level, WeirdingGadgetTicket ticket, ChunkPos ticketChunk) {
-        if (!(level instanceof ServerLevel)) return;
-        ServerLevel serverLevel = (ServerLevel)level;
+        if (!(level instanceof ServerLevel serverLevel)) return;
 
-        final ChunkSource chunkProvider = level.getChunkSource();
-        if (!(chunkProvider instanceof ServerChunkCache)) throw new RuntimeException("Attempted to force a chunk on the wrong side");
-        ServerChunkCache chunkManager = ((ServerChunkCache) chunkProvider);
+        final var chunkProvider = level.getChunkSource();
+        if (!(chunkProvider instanceof ServerChunkCache chunkManager)) throw new RuntimeException("Attempted to force a chunk on the wrong side");
 
         if ((ticket.getChunkCount() + 1) > Settings.CHUNK_LOADER_LIMITS.maximumChunksPerTicket.get()) {
             WeirdingGadgetMod.LOGGER.warn("Could not allocate a chunk because the maximum number of tickets has been assigned to the ticket {}", ticket);
             return;
         }
 
-        final CapabilityWeirdingGadgetTicketList.TicketListData capability = level.getCapability(CapabilityWeirdingGadgetTicketList.TICKET_LIST_DATA)
+        final var capability = level.getCapability(CapabilityWeirdingGadgetTicketList.TICKET_LIST_DATA)
                 .orElseThrow(() -> new RuntimeException("Missing Weirding Gadget Capability"));
 
         capability.addTicket(ticket);
 
-        Ticket<ChunkPos> existingTicket = ticket.getOrCreateTicket(ticketChunk);
+        var existingTicket = ticket.getOrCreateTicket(ticketChunk);
 
-        ForcedChunksSavedData forcedchunkssavedata = serverLevel.getDataStorage().computeIfAbsent(ForcedChunksSavedData::load, ForcedChunksSavedData::new, "chunks");
-        boolean added = forcedchunkssavedata.getChunks().add(ticketChunk.toLong());
+        var forcedchunkssavedata = serverLevel.getDataStorage().computeIfAbsent(ForcedChunksSavedData::load, ForcedChunksSavedData::new, "chunks");
+        var added = forcedchunkssavedata.getChunks().add(ticketChunk.toLong());
         if (added) {
             WeirdingGadgetMod.LOGGER.debug(ChunkManager, "Added {} to the forced chunk list of {}", ticketChunk, level.dimension().getRegistryName());
             serverLevel.getChunk(ticketChunk.x, ticketChunk.z);

@@ -51,10 +51,10 @@ public class WeirdingGadgetTileEntity extends BlockEntity
         assert level != null;
 
         //Release any existing tickets for this player.
-        final String playerName = ticket.getPlayerName();
-        final Iterator<WeirdingGadgetTicket> iterator = tickets.iterator();
+        final var playerName = ticket.getPlayerName();
+        final var iterator = tickets.iterator();
         while (iterator.hasNext()) {
-            final WeirdingGadgetTicket next = iterator.next();
+            final var next = iterator.next();
             if (next.getPlayerName().equals(playerName)) {
                 WeirdingGadgetChunkManager.releaseTicket(level, next);
                 iterator.remove();
@@ -69,9 +69,9 @@ public class WeirdingGadgetTileEntity extends BlockEntity
 
     public void addTrackedPlayer(@Nullable Player player)
     {
-        for (final WeakReference<Player> trackedPlayerReference : trackedPlayers)
+        for (final var trackedPlayerReference : trackedPlayers)
         {
-            final Player trackedPlayer = trackedPlayerReference.get();
+            final var trackedPlayer = trackedPlayerReference.get();
             if (trackedPlayer != null && player != null && player.getName() == trackedPlayer.getName()) {
                 return;
             }
@@ -90,23 +90,23 @@ public class WeirdingGadgetTileEntity extends BlockEntity
             return;
         }
 
-        final ResourceLocation dimensionName = level.dimension().getRegistryName();
+        final var dimensionName = level.dimension().getRegistryName();
 
         //Only process this chunk loader every 32 ticks
         // Should probably increase this to every minute or so.
-        final long totalLevelTime = level.getGameTime();
+        final var totalLevelTime = level.getGameTime();
         if ((totalLevelTime & 31) != 31) {
             return;
         }
 
-        boolean noTrackedPlayers = true;
+        var noTrackedPlayers = true;
 
-        final Iterator<WeakReference<Player>> trackedPlayerIterator = entity.trackedPlayers.iterator();
+        final var trackedPlayerIterator = entity.trackedPlayers.iterator();
         while (trackedPlayerIterator.hasNext())
         {
             //If we're tracking the ticket owner, check to see if they're still online
-            final WeakReference<Player> playerWeakReference = trackedPlayerIterator.next();
-            Player player = playerWeakReference.get();
+            final var playerWeakReference = trackedPlayerIterator.next();
+            var player = playerWeakReference.get();
 
             if (player != null)
             {
@@ -124,13 +124,13 @@ public class WeirdingGadgetTileEntity extends BlockEntity
             }
         }
 
-        boolean ticketNeedsExpiring = noTrackedPlayers;
+        var ticketNeedsExpiring = noTrackedPlayers;
         if (noTrackedPlayers) {
-            for (final WeirdingGadgetTicket ticket : entity.tickets)
+            for (final var ticket : entity.tickets)
             {
                 //If we're no longer tracking the ticket owner, but there is a ticket,
                 //Check to see if the player has come online.
-                final ServerPlayer PlayerByName = TicketUtils.getOnlinePlayerByName(level.getServer(), ticket.getPlayerName());
+                final var PlayerByName = TicketUtils.getOnlinePlayerByName(level.getServer(), ticket.getPlayerName());
                 //If they're found
                 if (PlayerByName != null)
                 {
@@ -151,7 +151,7 @@ public class WeirdingGadgetTileEntity extends BlockEntity
         //If there isn't an expiry time, it's time to set one.
         if (ticketNeedsExpiring && entity.expireTime == -1)
         {
-            final int timeout = Settings.SERVER.hoursBeforeDeactivation.get() * WeirdingGadgetMod.MULTIPLIER;
+            final var timeout = Settings.SERVER.hoursBeforeDeactivation.get() * WeirdingGadgetMod.MULTIPLIER;
             //final int timeout = 10 * 20;
             entity.setExpireTime(totalLevelTime + timeout);
             WeirdingGadgetMod.LOGGER.info("All players registered to this gadget at {} in {} have gone offline. Ticket is scheduled to expire at level time {}", pos, dimensionName, entity.expireTime);
@@ -161,7 +161,7 @@ public class WeirdingGadgetTileEntity extends BlockEntity
         //It's time to kill the ticket.
         if (entity.expireTime != -1 && totalLevelTime >= entity.expireTime) {
             WeirdingGadgetMod.LOGGER.info("Ticket for Weirding Gadget at {} in {} has expired.", entity.worldPosition, dimensionName);
-            for (final WeirdingGadgetTicket ticket : entity.tickets)
+            for (final var ticket : entity.tickets)
             {
                 WeirdingGadgetChunkManager.releaseTicket(level, ticket);
             }
@@ -180,7 +180,7 @@ public class WeirdingGadgetTileEntity extends BlockEntity
     @Override
     public void load(CompoundTag nbt) {
         super.load(nbt);
-        CompoundTag tileData = getTileData();
+        var tileData = getTileData();
 
         //Legacy nbt tag, moved to tile data.
         //Will be removed in 1.19+
@@ -208,7 +208,7 @@ public class WeirdingGadgetTileEntity extends BlockEntity
     @Override
     public CompoundTag getUpdateTag()
     {
-        final CompoundTag updateTag = super.getUpdateTag();
+        final var updateTag = super.getUpdateTag();
         updateTag.putBoolean("isActive", isActive);
         return updateTag;
     }
@@ -231,7 +231,7 @@ public class WeirdingGadgetTileEntity extends BlockEntity
 
     public boolean hasTicket(Player player)
     {
-        for (final WeirdingGadgetTicket ticket : tickets)
+        for (final var ticket : tickets)
         {
             if (ticket.getPlayerName().equals(player.getName().getString())) return true;
         }
@@ -240,7 +240,7 @@ public class WeirdingGadgetTileEntity extends BlockEntity
 
     public void expireAllTickets()
     {
-        for (final WeirdingGadgetTicket ticket : tickets)
+        for (final var ticket : tickets)
         {
             WeirdingGadgetChunkManager.releaseTicket(level, ticket);
         }

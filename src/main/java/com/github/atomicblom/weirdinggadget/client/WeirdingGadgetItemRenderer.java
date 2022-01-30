@@ -60,13 +60,13 @@ public class WeirdingGadgetItemRenderer extends BlockEntityWithoutLevelRenderer 
             angle = System.currentTimeMillis() % (360 * 4) / 4.0f;
         }
 
-        BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
+        var blockRenderer = Minecraft.getInstance().getBlockRenderer();
 
-        final BlockState baseState = BlockLibrary.weirding_gadget.defaultBlockState()
+        final var baseState = BlockLibrary.weirding_gadget.defaultBlockState()
                 .setValue(WeirdingGadgetBlock.ACTIVE, true)
                 .setValue(WeirdingGadgetBlock.RENDER, RenderType.STATIC);
 
-        final BlockState spinnerState = baseState
+        final var spinnerState = baseState
                 .setValue(WeirdingGadgetBlock.RENDER, RenderType.DYNAMIC);
 
         blockRenderer.renderSingleBlock(baseState, matrixStack, buffer, combinedLight, combinedOverlay, EmptyModelData.INSTANCE);

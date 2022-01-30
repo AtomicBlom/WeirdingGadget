@@ -14,9 +14,9 @@ public final class ChunkManagerCallback
 {
     public static void ticketsLoaded(ImmutableCollection<WeirdingGadgetTicket> tickets, Level level)
     {
-        for (final WeirdingGadgetTicket ticket : tickets)
+        for (final var ticket : tickets)
         {
-            final CompoundTag modData = ticket.getModData();
+            final var modData = ticket.getModData();
             if (!modData.contains("blockPosition")) {
                 continue;
             }
@@ -33,10 +33,10 @@ public final class ChunkManagerCallback
             return returnedTickets;
         }
 
-        for (final Map.Entry<String, List<WeirdingGadgetTicket>> playerTicketMap : tickets.entrySet())
+        for (final var playerTicketMap : tickets.entrySet())
         {
-            final String player = playerTicketMap.getKey();
-            for (final WeirdingGadgetTicket ticket : playerTicketMap.getValue())
+            final var player = playerTicketMap.getKey();
+            for (final var ticket : playerTicketMap.getValue())
             {
                 if (TicketUtils.isTicketValid(level, ticket)) {
                     returnedTickets.put(player, ticket);

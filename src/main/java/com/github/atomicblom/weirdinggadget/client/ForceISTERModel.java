@@ -78,7 +78,7 @@ public class ForceISTERModel implements BakedModel {
     @Override
     public BakedModel handlePerspective(ItemTransforms.TransformType type, PoseStack mat)
     {
-        Transformation matrix =
+        var matrix =
                 PerspectiveMapWrapper.getTransforms(owner.getCombinedTransform()).getOrDefault(type, Transformation.identity());
 
         if (type == ItemTransforms.TransformType.HEAD) {

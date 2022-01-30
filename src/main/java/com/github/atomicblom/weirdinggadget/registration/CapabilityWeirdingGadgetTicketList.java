@@ -60,11 +60,11 @@ public class CapabilityWeirdingGadgetTicketList {
                 tickets.put(ticket.getId(), ticket);
 
                 if (ticket.getPlayerName() != null) {
-                    final Set<UUID> playerGadgets = playerTickets.computeIfAbsent(ticket.getPlayerName(), p -> Sets.newHashSet());
+                    final var playerGadgets = playerTickets.computeIfAbsent(ticket.getPlayerName(), p -> Sets.newHashSet());
                     playerGadgets.add(ticket.getId());
                 }
 
-                final Set<UUID> modGadgets = modTickets.computeIfAbsent(ticket.getModName(), p -> Sets.newHashSet());
+                final var modGadgets = modTickets.computeIfAbsent(ticket.getModName(), p -> Sets.newHashSet());
                 modGadgets.add(ticket.getId());
             }
         }
@@ -74,35 +74,35 @@ public class CapabilityWeirdingGadgetTicketList {
         }
 
         public int getTotalPlayerTicketCount(String playerName) {
-            final Set<UUID> playerTickets = this.playerTickets.getOrDefault(playerName, Sets.newHashSet());
+            final var playerTickets = this.playerTickets.getOrDefault(playerName, Sets.newHashSet());
             return playerTickets.size();
         }
 
         public int getTotalModTicketCount(String modName) {
 
-            final Set<UUID> modTickets = this.modTickets.getOrDefault(modName, Sets.newHashSet());
+            final var modTickets = this.modTickets.getOrDefault(modName, Sets.newHashSet());
             return modTickets.size();
         }
 
         public void removeTicket(UUID ticketId) {
             tickets.remove(ticketId);
-            for (Set<UUID> playerSet : playerTickets.values()) {
+            for (var playerSet : playerTickets.values()) {
                 playerSet.remove(ticketId);
             }
-            for (Set<UUID> modSet : modTickets.values()) {
+            for (var modSet : modTickets.values()) {
                 modSet.remove(ticketId);
             }
         }
 
         public ListTag writeToNBT() {
-            ListTag ticketList = new ListTag();
-            for (WeirdingGadgetTicket ticket : tickets.values()) {
-                CompoundTag ticketData = new CompoundTag();
+            var ticketList = new ListTag();
+            for (var ticket : tickets.values()) {
+                var ticketData = new CompoundTag();
                 if (ticket.getPlayerName() != null) {
                     ticketData.putString("playerName", ticket.getPlayerName());
                 }
                 ticketData.putString("modName", ticket.getModName());
-                CompoundTag modData = ticket.getModData();
+                var modData = ticket.getModData();
                 if (modData != null) {
                     ticketData.put("data", modData);
                 }
@@ -113,13 +113,12 @@ public class CapabilityWeirdingGadgetTicketList {
         }
 
         public void readFromNBT(ListTag nbt) {
-            for (Tag inbt : nbt) {
-                if (!(inbt instanceof CompoundTag)) continue;
-                CompoundTag ticketData = (CompoundTag)inbt;
+            for (var inbt : nbt) {
+                if (!(inbt instanceof CompoundTag ticketData)) continue;
 
-                String playerName = ticketData.getString("playerName");
-                String modName = ticketData.getString("modName");
-                WeirdingGadgetTicket ticket = new WeirdingGadgetTicket(playerName, modName);
+                var playerName = ticketData.getString("playerName");
+                var modName = ticketData.getString("modName");
+                var ticket = new WeirdingGadgetTicket(playerName, modName);
                 ticket.setModData(ticketData.getCompound("data"));
 
                 addTicket(ticket);
