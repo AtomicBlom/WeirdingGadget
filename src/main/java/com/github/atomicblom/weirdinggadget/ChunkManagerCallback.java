@@ -4,7 +4,6 @@ import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetTicket;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ListMultimap;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 
 import java.util.List;

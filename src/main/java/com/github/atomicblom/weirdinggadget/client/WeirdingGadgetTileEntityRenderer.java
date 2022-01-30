@@ -7,17 +7,13 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.EmptyModelData;
 
 public class WeirdingGadgetTileEntityRenderer implements BlockEntityRenderer<WeirdingGadgetTileEntity> {
@@ -35,15 +31,6 @@ public class WeirdingGadgetTileEntityRenderer implements BlockEntityRenderer<Wei
         var level = tileEntityIn.getLevel();
         if (level == null) return;
 
-//        RenderType type = RenderType.create("weirding_gadget", DefaultVertexFormat.BLOCK, VertexFormat.Mode.TRIANGLES, 2097152, true, false,
-//                RenderType.CompositeState.builder()
-//                        .setShaderState(RenderStateShard.RENDERTYPE_SOLID_SHADER)
-//                        //.shadeModel(RenderState.SHADE_ENABLED)
-//                        .setLightmapState(RenderStateShard.LIGHTMAP)
-//                        .setTextureState(RenderStateShard.BLOCK_SHEET_MIPPED)
-//                        .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
-//                        .createCompositeState(false)
-//        );
         var type = RenderType.solid();
 
         final var player = Minecraft.getInstance().player;

@@ -3,15 +3,12 @@ package com.github.atomicblom.weirdinggadget;
 import com.github.atomicblom.weirdinggadget.block.tileentity.WeirdingGadgetTileEntity;
 import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetChunkManager;
 import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetTicket;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
  * Created by codew on 17/01/2017.
