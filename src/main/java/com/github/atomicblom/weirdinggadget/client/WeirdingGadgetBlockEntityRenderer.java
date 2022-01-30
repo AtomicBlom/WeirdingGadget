@@ -28,7 +28,14 @@ public class WeirdingGadgetBlockEntityRenderer implements BlockEntityRenderer<We
         var level = blockEntity.getLevel();
         if (level == null) return;
 
-        var type = RenderType.solid();
+        var type = RenderType.create("weirding_gadget", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 2097152, true, false,
+                RenderType.CompositeState.builder()
+                        .setShaderState(RenderStateShard.RENDERTYPE_SOLID_SHADER)
+                        .setLightmapState(RenderStateShard.LIGHTMAP)
+                        .setTextureState(RenderStateShard.BLOCK_SHEET_MIPPED)
+                        .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
+                .createCompositeState(false)
+        );
 
         final var player = Minecraft.getInstance().player;
         assert  player != null;
