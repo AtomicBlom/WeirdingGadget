@@ -33,7 +33,6 @@ version = (hasProperty("CIRevision") ? CIRevision : project.mod_version)
 group = project.group_name
 archivesBaseName = "${project.mod_id}-${project.minecraft_version_on_jar}"
 
-//sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
@@ -99,7 +98,7 @@ compileJava {
     source = processSource.outputs
 }
 
-repositories { //Access to Gigaherz private maven server for community mappings
+repositories {
     maven { url 'https://dvs1.progwml6.com/files/maven' } // JEI & Tinkers
     maven { url = 'https://maven.blamejared.com/' } //IE
 }

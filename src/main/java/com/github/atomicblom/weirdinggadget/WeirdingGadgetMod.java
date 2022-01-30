@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class WeirdingGadgetMod
 {
     public static final String MOD_ID = "weirdinggadget";
-    public static int MULTIPLIER = 20 * 60 * 60; //Hours in ticks
+    public static int MULTIPLIER = 20; //Seconds in ticks
 
     // Directly reference a log4j logger.
     public static final Logger LOGGER = LogManager.getLogger();

@@ -10,6 +10,8 @@ import com.github.atomicblom.weirdinggadget.library.BlockEntityTypeLibrary;
 import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -208,6 +210,16 @@ public class WeirdingGadgetBlockEntity extends BlockEntity
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt){
+        handleUpdateTag(pkt.getTag());
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return new ClientboundBlockEntityDataPacket(worldPosition, ACTIVE_STATE_CHANGED, getUpdateTag());
     }
 
     @Override
