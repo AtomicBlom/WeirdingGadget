@@ -8,7 +8,6 @@ import com.github.atomicblom.weirdinggadget.chunkloading.Type;
 import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetChunkManager;
 import com.github.atomicblom.weirdinggadget.library.TileEntityTypeLibrary;
 import net.minecraft.ChatFormatting;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
@@ -40,11 +39,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 
-@ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class WeirdingGadgetBlock extends BaseEntityBlock
 {
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");

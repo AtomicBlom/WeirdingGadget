@@ -3,7 +3,6 @@ package com.github.atomicblom.weirdinggadget.chunkloading;
 import com.github.atomicblom.weirdinggadget.Settings;
 import com.github.atomicblom.weirdinggadget.WeirdingGadgetMod;
 import com.github.atomicblom.weirdinggadget.registration.CapabilityWeirdingGadgetTicketList;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -14,10 +13,7 @@ import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 
 import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 
-@MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
 public class WeirdingGadgetChunkManager {
     static Marker ChunkManager = new MarkerManager.Log4jMarker("WGChunkManager");
 

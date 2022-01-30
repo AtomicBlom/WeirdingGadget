@@ -8,7 +8,6 @@ import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetChunkMana
 import com.github.atomicblom.weirdinggadget.chunkloading.WeirdingGadgetTicket;
 import com.github.atomicblom.weirdinggadget.library.TileEntityTypeLibrary;
 import com.google.common.collect.Lists;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
@@ -18,13 +17,10 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 import java.util.List;
 
-@MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
 public class WeirdingGadgetTileEntity extends BlockEntity
 {
     private static final int ACTIVE_STATE_CHANGED = 1;
