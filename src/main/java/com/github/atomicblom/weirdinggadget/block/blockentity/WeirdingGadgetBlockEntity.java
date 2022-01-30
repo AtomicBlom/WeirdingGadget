@@ -132,25 +132,25 @@ public class WeirdingGadgetBlockEntity extends BlockEntity
         }
 
         var ticketNeedsExpiring = noTrackedPlayers;
-        if (noTrackedPlayers) {
-            for (final var ticket : tickets)
+        for (final var ticket : tickets)
+        {
+            //If we're no longer tracking the ticket owner, but there is a ticket,
+            //Check to see if the player has come online.
+            final var PlayerByName = TicketUtils.getOnlinePlayerByName(server, ticket.getPlayerName());
+            //If they're found
+            if (PlayerByName != null)
             {
-                //If we're no longer tracking the ticket owner, but there is a ticket,
-                //Check to see if the player has come online.
-                final var PlayerByName = TicketUtils.getOnlinePlayerByName(server, ticket.getPlayerName());
-                //If they're found
-                if (PlayerByName != null)
-                {
-                    //reset the expiry
-                    setExpireTime(-1);
-                    //start tracking the player
-                    trackedPlayers.add(new WeakReference<>(PlayerByName));
+                //reset the expiry
+                setExpireTime(-1);
+                //start tracking the player
+                trackedPlayers.add(new WeakReference<>(PlayerByName));
+                if (!this.isActive || noTrackedPlayers) {
                     WeirdingGadgetMod.LOGGER.info("Chunk Loader at {} in {} is revived because {} returned", worldPosition, dimensionName, PlayerByName.getName().getString());
                     //Start the animation again
                     blockState.triggerEvent(level, worldPosition, ACTIVE_STATE_CHANGED, 1);
-                    //Block any further processing
-                    ticketNeedsExpiring = false;
                 }
+                //Block any further processing
+                ticketNeedsExpiring = false;
             }
         }
 
@@ -164,7 +164,7 @@ public class WeirdingGadgetBlockEntity extends BlockEntity
             WeirdingGadgetMod.LOGGER.info("All players registered to this gadget at {} in {} have gone offline. Ticket is scheduled to expire at level time {}", worldPosition, dimensionName, expireTime);
         }
 
-        //If the expire time has expired and we've reached this far
+        //If the expire time has expired, and we've reached this far
         //It's time to kill the ticket.
         if (expireTime != -1 && gameTime >= expireTime) {
             WeirdingGadgetMod.LOGGER.info("Ticket for Weirding Gadget at {} in {} has expired.", worldPosition, dimensionName);
