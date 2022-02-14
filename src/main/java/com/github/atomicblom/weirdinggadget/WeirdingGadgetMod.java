@@ -32,7 +32,7 @@ public class WeirdingGadgetMod
     public static boolean IS_CI_BUILD = false;
 
     public WeirdingGadgetMod() {
-        if (Boolean.getBoolean("@IS_CI_BUILD@")) {
+        if (Boolean.valueOf("@IS_CI_BUILD@")) {
             IS_CI_BUILD = true;
             MULTIPLIER = 20 * 60 * 60; //Protect against me being an idiot
         }
